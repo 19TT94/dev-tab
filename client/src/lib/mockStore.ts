@@ -296,8 +296,7 @@ export const mockStore = {
     const data = load()
     const idx = data.projects.findIndex((p) => p.id === input.id)
     if (idx === -1) throw new Error('Project not found')
-    const { id: projectId, ...rest } = input
-    data.projects[idx] = { ...data.projects[idx], ...rest }
+    data.projects[idx] = { ...data.projects[idx], ...input }
     save(data)
     return data.projects[idx]
   },
@@ -389,11 +388,10 @@ export const mockStore = {
     const data = load()
     const idx = data.timeEntries.findIndex((e) => e.id === input.id)
     if (idx === -1) throw new Error('Time entry not found')
-    const { id: entryId, ...rest } = input
     data.timeEntries[idx] = {
       ...data.timeEntries[idx],
-      ...rest,
-      description: rest.description ?? null,
+      ...input,
+      description: input.description ?? null,
       updated_at: now(),
     }
     save(data)

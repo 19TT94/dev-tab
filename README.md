@@ -34,7 +34,7 @@ A stripped-down time tracking and invoicing app for billing contract clients. Bu
 Copy the example env file and fill in your Supabase credentials:
 
 ```bash
-cd frontend
+cd client
 cp .env.example .env.local
 ```
 
@@ -52,7 +52,7 @@ Find your Supabase URL and anon key under **Project Settings → API**.
 ### 3. Run locally
 
 ```bash
-cd frontend
+cd client
 npm install
 npm run dev
 ```
@@ -63,7 +63,7 @@ Open [http://localhost:5173](http://localhost:5173) and sign in with the user yo
 
 1. Push this repo to GitHub
 2. In Netlify, create a new site from the repo
-3. Set the **base directory** to `frontend`
+3. Set the **base directory** to `client`
 4. Build command: `npm run build`
 5. Publish directory: `dist`
 6. Add environment variables in Netlify (same as `.env.local`):
@@ -72,7 +72,7 @@ Open [http://localhost:5173](http://localhost:5173) and sign in with the user yo
    - `VITE_BUSINESS_NAME`
    - `VITE_BUSINESS_ADDRESS`
 
-The included [`frontend/netlify.toml`](frontend/netlify.toml) handles SPA routing automatically.
+The included [`client/netlify.toml`](client/netlify.toml) handles SPA routing and enables mock data for deploy previews and branch deploys.
 
 ## Usage workflow
 
@@ -85,8 +85,8 @@ The included [`frontend/netlify.toml`](frontend/netlify.toml) handles SPA routin
 ## Project structure
 
 ```
-personal-invoice/
-├── frontend/          # React SPA
+devtab/
+├── client/            # React SPA
 │   ├── src/
 │   │   ├── components/
 │   │   ├── hooks/

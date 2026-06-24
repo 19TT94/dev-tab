@@ -11,7 +11,7 @@ const LOCAL_TIMER_KEY = 'active_timer'
 export function useTimer() {
   const { user } = useAuth()
   const queryClient = useQueryClient()
-  const [elapsed, setElapsed] = useState(0)
+  const [now, setNow] = useState(() => Date.now())
 
   const { data: activeTimer, isLoading } = useQuery({
     queryKey: ['active_timer', user?.id],
@@ -29,22 +29,22 @@ export function useTimer() {
 
   useEffect(() => {
     if (!activeTimer) {
-      setElapsed(0)
       localStorage.removeItem(LOCAL_TIMER_KEY)
       return
     }
 
     localStorage.setItem(LOCAL_TIMER_KEY, JSON.stringify(activeTimer))
 
-    const tick = () => {
-      const start = new Date(activeTimer.started_at).getTime()
-      setElapsed(Math.floor((Date.now() - start) / 1000))
-    }
-
-    tick()
-    const interval = setInterval(tick, 1000)
+    const interval = setInterval(() => setNow(Date.now()), 1000)
     return () => clearInterval(interval)
   }, [activeTimer])
+
+  const elapsed = activeTimer
+    ? Math.max(
+        0,
+        Math.floor((now - new Date(activeTimer.started_at).getTime()) / 1000),
+      )
+    : 0
 
   const start = useMutation({
     mutationFn: async (input: { project_id: string; description?: string }) => {

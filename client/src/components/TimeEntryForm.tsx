@@ -1,5 +1,5 @@
 import { useEffect } from 'react'
-import { useForm } from 'react-hook-form'
+import { useForm, useWatch } from 'react-hook-form'
 
 // Hooks
 import { useProjects } from '../hooks/useProjects'
@@ -37,7 +37,7 @@ interface TimeEntryFormProps {
 export const TimeEntryForm = ({ entry, onSubmit, onCancel }: TimeEntryFormProps) => {
   const { data: projects = [] } = useProjects()
 
-  const { register, handleSubmit, watch, setValue, formState: { isSubmitting } } =
+  const { register, handleSubmit, control, setValue, formState: { isSubmitting } } =
     useForm<TimeEntryFormData>({
       defaultValues: entry
         ? {
@@ -58,7 +58,7 @@ export const TimeEntryForm = ({ entry, onSubmit, onCancel }: TimeEntryFormProps)
           },
     })
 
-  const projectId = watch('project_id')
+  const projectId = useWatch({ control, name: 'project_id' })
   const selectedProject = projects.find((p) => p.id === projectId)
 
   useEffect(() => {

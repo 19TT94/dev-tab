@@ -1,6 +1,7 @@
 export { Button } from './Button'
 export type { ButtonProps, ButtonVariant, ButtonSize } from './Button'
-export { Input, Select, Textarea, InlineInput, InlineSelect } from './FormFields'
+export { Input, Select, Textarea } from './FormFields'
+export { InlineInput, InlineSelect } from './InlineFields'
 export {
   Card,
   CardHeader,

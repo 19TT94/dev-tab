@@ -3,7 +3,7 @@ import { describe, expect, it } from 'vitest'
 import { QueryClientProvider } from '@tanstack/react-query'
 import { useProjects, useProjectMutations } from '../useProjects'
 import { useClients } from '../useClients'
-import { AuthProvider } from '../useAuth'
+import { AuthProvider } from '../AuthProvider'
 import { createTestQueryClient } from '../../test/render'
 
 function wrapper({ children }: { children: React.ReactNode }) {

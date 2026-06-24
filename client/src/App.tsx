@@ -2,7 +2,7 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 
 // Hooks
-import { AuthProvider } from './hooks/useAuth'
+import { AuthProvider } from './hooks/AuthProvider'
 import { ProtectedRoute } from './hooks/ProtectedRoute'
 
 // Components

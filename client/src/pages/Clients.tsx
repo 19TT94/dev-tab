@@ -1,6 +1,5 @@
 import { useState } from 'react'
 import styled from 'styled-components'
-import { useForm } from 'react-hook-form'
 
 // Hooks
 import { useClients, useClientMutations } from '../hooks/useClients'
@@ -9,93 +8,26 @@ import { useProjects, useProjectMutations } from '../hooks/useProjects'
 // Types
 import type { Client, ProjectWithClient } from '../types/database'
 import type { ClientFormData } from '../components/ClientForm'
+import type { ProjectFormPayload } from '../components/ProjectForm'
 
 // Components
 import { ModalAddClient } from '../components/ModalAddClient'
+import { ModalAddProject } from '../components/ModalAddProject'
 import { Button } from '../components/Button'
-import { Input } from '../components/FormFields'
 import {
   ButtonRow,
   Card,
-  Checkbox,
-  CheckboxLabel,
-  FormStack,
   PageContainer,
   PageHeader,
   PageStack,
   PageSubtitle,
   PageTitle,
-  Panel,
   Text,
 } from '../components/ui'
 
 // Utils
 import { hasRetainerBilling } from '../lib/billing'
 import { formatCurrency } from '../lib/utils'
-
-interface ProjectFormData {
-  name: string
-  hourly_rate: string
-  billable: boolean
-}
-
-const ProjectForm = ({
-  clientId,
-  project,
-  onSave,
-  onCancel,
-}: {
-  clientId: string
-  project?: ProjectWithClient
-  onSave: (data: { client_id: string; name: string; hourly_rate: number | null; billable: boolean }) => Promise<void>
-  onCancel: () => void
-}) => {
-  const { register, handleSubmit, formState: { isSubmitting } } = useForm<ProjectFormData>({
-    defaultValues: project
-      ? {
-          name: project.name,
-          hourly_rate: project.hourly_rate?.toString() ?? '',
-          billable: project.billable,
-        }
-      : { name: '', hourly_rate: '', billable: true },
-  })
-
-  const submit = handleSubmit(async (data) => {
-    await onSave({
-      client_id: clientId,
-      name: data.name,
-      hourly_rate: data.hourly_rate ? parseFloat(data.hourly_rate) : null,
-      billable: data.billable,
-    })
-  })
-
-  return (
-    <Panel as="form" onSubmit={submit} style={{ marginTop: '0.75rem' }}>
-      <FormStack>
-        <Input label="Project name" {...register('name', { required: true })} />
-        <Input
-          label="Hourly rate override ($, optional)"
-          type="number"
-          step="0.01"
-          min="0"
-          {...register('hourly_rate')}
-        />
-        <CheckboxLabel>
-          <Checkbox {...register('billable')} />
-          Billable by default
-        </CheckboxLabel>
-        <ButtonRow>
-          <Button type="submit" size="sm" disabled={isSubmitting}>
-            {isSubmitting ? 'Saving...' : 'Save Project'}
-          </Button>
-          <Button type="button" variant="secondary" size="sm" onClick={onCancel}>
-            Cancel
-          </Button>
-        </ButtonRow>
-      </FormStack>
-    </Panel>
-  )
-}
 
 const ClientsPage = () => {
   const { data: clients = [], isLoading: clientsLoading } = useClients()
@@ -133,12 +65,12 @@ const ClientsPage = () => {
     closeModal()
   }
 
-  const saveProject = async (data: {
-    client_id: string
-    name: string
-    hourly_rate: number | null
-    billable: boolean
-  }) => {
+  const closeProjectModal = () => {
+    setAddingProjectFor(null)
+    setEditingProject(null)
+  }
+
+  const saveProject = async (data: ProjectFormPayload) => {
     if (editingProject) {
       await projectMutations.update.mutateAsync({
         id: editingProject.id,
@@ -146,11 +78,10 @@ const ClientsPage = () => {
         hourly_rate: data.hourly_rate,
         billable: data.billable,
       })
-      setEditingProject(null)
     } else {
       await projectMutations.create.mutateAsync(data)
-      setAddingProjectFor(null)
     }
+    closeProjectModal()
   }
 
   const deleteClient = async (id: string) => {
@@ -194,6 +125,14 @@ const ClientsPage = () => {
           client={editingClient ?? undefined}
           onSave={saveClient}
           onClose={closeModal}
+        />
+
+        <ModalAddProject
+          open={addingProjectFor !== null || editingProject !== null}
+          clientId={editingProject?.client_id ?? addingProjectFor ?? ''}
+          project={editingProject ?? undefined}
+          onSave={saveProject}
+          onClose={closeProjectModal}
         />
 
         {clientsLoading ? (
@@ -247,79 +186,60 @@ const ClientsPage = () => {
                     <ProjectsSection>
                       <ProjectsHeader>
                         <ProjectsTitle>Projects</ProjectsTitle>
-                        {!addingProjectFor && !editingProject && (
-                          <Button
-                            size="sm"
-                            variant="secondary"
-                            onClick={() => setAddingProjectFor(client.id)}
-                          >
-                            Add Project
-                          </Button>
-                        )}
+                        <Button
+                          size="sm"
+                          variant="secondary"
+                          onClick={() => setAddingProjectFor(client.id)}
+                        >
+                          Add Project
+                        </Button>
                       </ProjectsHeader>
 
-                      {addingProjectFor === client.id && (
-                        <ProjectForm
-                          clientId={client.id}
-                          onSave={saveProject}
-                          onCancel={() => setAddingProjectFor(null)}
-                        />
-                      )}
-
-                      {clientProjects.length === 0 && addingProjectFor !== client.id ? (
+                      {clientProjects.length === 0 ? (
                         <Text $color="muted">No projects yet.</Text>
                       ) : (
                         <ProjectList>
                           {clientProjects.map((project) => (
                             <li key={project.id}>
-                              {editingProject?.id === project.id ? (
-                                <ProjectForm
-                                  clientId={client.id}
-                                  project={project}
-                                  onSave={saveProject}
-                                  onCancel={() => setEditingProject(null)}
-                                />
-                              ) : (
-                                <ProjectItem>
-                                  <div>
-                                    <ProjectName>
-                                      {project.name}
-                                      {project.archived && (
-                                        <ArchivedTag>(archived)</ArchivedTag>
-                                      )}
-                                    </ProjectName>
-                                    <ProjectMeta>
-                                      {project.hourly_rate != null
-                                        ? formatCurrency(project.hourly_rate)
-                                        : formatCurrency(client.default_hourly_rate)}{' '}
-                                      /hr · {project.billable ? 'Billable' : 'Non-billable'}
-                                    </ProjectMeta>
-                                  </div>
-                                  <ButtonRow>
-                                    <Button
-                                      variant="ghost"
-                                      size="sm"
-                                      onClick={() => setEditingProject(project)}
-                                    >
-                                      Edit
-                                    </Button>
-                                    <Button
-                                      variant="ghost"
-                                      size="sm"
-                                      onClick={() => archiveProject(project)}
-                                    >
-                                      {project.archived ? 'Restore' : 'Archive'}
-                                    </Button>
-                                    <Button
-                                      variant="ghost"
-                                      size="sm"
-                                      onClick={() => deleteProject(project.id)}
-                                    >
-                                      Delete
-                                    </Button>
-                                  </ButtonRow>
-                                </ProjectItem>
-                              )}
+                              <ProjectItem>
+                                <div>
+                                  <ProjectName>
+                                    {project.name}
+                                    {project.archived && (
+                                      <ArchivedTag>(archived)</ArchivedTag>
+                                    )}
+                                  </ProjectName>
+                                  <ProjectMeta>
+                                    {project.hourly_rate != null
+                                      ? formatCurrency(project.hourly_rate)
+                                      : formatCurrency(client.default_hourly_rate)}{' '}
+                                    /hr · {project.billable ? 'Billable' : 'Non-billable'}
+                                  </ProjectMeta>
+                                </div>
+                                <ButtonRow>
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    onClick={() => setEditingProject(project)}
+                                  >
+                                    Edit
+                                  </Button>
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    onClick={() => archiveProject(project)}
+                                  >
+                                    {project.archived ? 'Restore' : 'Archive'}
+                                  </Button>
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    onClick={() => deleteProject(project.id)}
+                                  >
+                                    Delete
+                                  </Button>
+                                </ButtonRow>
+                              </ProjectItem>
                             </li>
                           ))}
                         </ProjectList>
