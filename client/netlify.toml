@@ -2,6 +2,15 @@
   command = "npm run build"
   publish = "dist"
 
+[context.deploy-preview.environment]
+  VITE_USE_MOCK_DATA = "true"
+
+[context.branch-deploy.environment]
+  VITE_USE_MOCK_DATA = "true"
+
+[context.production.environment]
+  VITE_USE_MOCK_DATA = "false"
+
 [[redirects]]
   from = "/*"
   to = "/index.html"
