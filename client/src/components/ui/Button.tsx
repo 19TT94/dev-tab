@@ -76,7 +76,7 @@ const sizeStyles = {
   `,
 }
 
-export const StyledButton = styled.button<StyledButtonProps>`
+const StyledButton = styled.button<StyledButtonProps>`
   display: inline-flex;
   align-items: center;
   justify-content: center;

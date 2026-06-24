@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import styled, { css } from 'styled-components'
 import { NavLink, useLocation } from 'react-router-dom'
 
@@ -34,12 +34,15 @@ export const Layout = ({ children }: { children: React.ReactNode }) => {
   const location = useLocation()
   const [isCollapsed, setIsCollapsed] = useState(true)
   const [isDrawerOpen, setIsDrawerOpen] = useState(false)
+  const [lastPath, setLastPath] = useState(location.pathname)
 
   useTimerDocumentTitle()
 
-  useEffect(() => {
+  // Close the mobile drawer whenever the route changes (incl. browser back/forward).
+  if (location.pathname !== lastPath) {
+    setLastPath(location.pathname)
     setIsDrawerOpen(false)
-  }, [location.pathname])
+  }
 
   return (
     <Shell>

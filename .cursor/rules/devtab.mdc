@@ -71,6 +71,7 @@ Shared UI in `components/ui/` may colocate styled definitions with exports; page
   - disabled: `opacity: 0.5` + `cursor: not-allowed`
   - tinted backgrounds: `color-mix(in srgb, ${theme.colors.primary} 12%, ${theme.colors.tertiary})`
 - Use transient props with `$` prefix for styled-only props (`$variant`, `$color`, `$align`).
+- **Always use styled-components for styling — never the inline `style` prop.** If a one-off style is needed, define a page-local styled-component (under `// Style Overrides`) or extend an existing one with `styled(Existing)`. The `style` prop is only acceptable for genuinely dynamic values computed at runtime (e.g. a width driven by state) that cannot be expressed in CSS.
 
 ## General
 

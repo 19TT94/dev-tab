@@ -1,4 +1,4 @@
-import { useForm } from 'react-hook-form'
+import { useForm, useWatch } from 'react-hook-form'
 
 // Types
 import type { Client } from '../types/database'
@@ -25,7 +25,7 @@ interface ClientFormProps {
 }
 
 export const ClientForm = ({ client, onSave, onCancel }: ClientFormProps) => {
-  const { register, handleSubmit, watch, formState: { isSubmitting } } = useForm<ClientFormData>({
+  const { register, handleSubmit, control, formState: { isSubmitting } } = useForm<ClientFormData>({
     defaultValues: client
       ? {
           name: client.name,
@@ -47,7 +47,7 @@ export const ClientForm = ({ client, onSave, onCancel }: ClientFormProps) => {
         },
   })
 
-  const retainerEnabled = watch('retainer_enabled')
+  const retainerEnabled = useWatch({ control, name: 'retainer_enabled' })
 
   return (
     <FormStack onSubmit={handleSubmit(onSave)}>
