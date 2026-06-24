@@ -1,0 +1,79 @@
+---
+description: DevTab project conventions — React client structure, imports, styled-components, and theme usage
+alwaysApply: false
+---
+
+# DevTab Project Rules
+
+## Scope
+
+- App code lives in `client/src/` (React + TypeScript + styled-components + TanStack Query).
+- Shared UI primitives: `client/src/components/ui/`
+- Pages: `client/src/pages/`
+- Theme: `client/src/styles/theme.ts`
+- Keep diffs focused; match existing patterns in neighboring files.
+
+## Import groups
+
+Separate imports with blank lines and a comment label. Order:
+
+1. External packages (no comment) — `react`, `react-router-dom`, `styled-components`, etc.
+2. `// Hooks`
+3. `// Components`
+4. `// Pages` — only in routing files like `App.tsx`
+5. `// Utils` — helpers from `lib/` (utils, billing, config, etc.)
+6. `// Types` — when importing from `types/`
+7. `// Styles` — theme, GlobalStyle
+
+Use only the groups a file needs. Do not mix unlabeled local imports into a group.
+
+```tsx
+import styled from "styled-components";
+
+// Components
+import { Button } from "../components/Button";
+import { PageTitle } from "../components/ui";
+
+// Styles
+import { theme } from "../styles/theme";
+```
+
+## Pages & feature components
+
+Follow `client/src/pages/ComponentLibrary.tsx`:
+
+1. **Arrow function components** — `const MyPage = () => { ... }`, not `function MyPage()`.
+2. **Module constants/data** above the component (e.g. config arrays, static maps).
+3. **Component body first**, then page-local styled-components **below** the component under a `// Style Overrides` comment.
+4. **Default export** for pages: `export default MyPage;`
+
+```tsx
+const MyPage = () => {
+  return <PageContainer>...</PageContainer>;
+};
+
+// Style Overrides
+const Section = styled.section`
+  display: flex;
+  gap: 1rem;
+`;
+
+export default MyPage;
+```
+
+Shared UI in `components/ui/` may colocate styled definitions with exports; pages and feature components must not define styled-components above the component.
+
+## Styled-components & theme
+
+- Read colors from `theme.colors` — use semantic tokens: `background`, `primary`, `secondary`, `tertiary`, `muted`, `border`, `success`, `danger`, `accent`.
+- Do **not** add hover/disabled/muted color variants to `theme.ts`. Handle states in component CSS:
+  - hover: `filter: brightness(0.92)` or `opacity: 0.8` on links
+  - disabled: `opacity: 0.5` + `cursor: not-allowed`
+  - tinted backgrounds: `color-mix(in srgb, ${theme.colors.primary} 12%, ${theme.colors.tertiary})`
+- Use transient props with `$` prefix for styled-only props (`$variant`, `$color`, `$align`).
+
+## General
+
+- Prefer existing hooks and `components/ui` exports over new abstractions.
+- Co-locate tests in `__test__/` next to the module under test.
+- Only commit when explicitly asked.
