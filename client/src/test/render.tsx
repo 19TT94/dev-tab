@@ -3,7 +3,7 @@ import { render, type RenderOptions } from '@testing-library/react'
 import type { ReactElement, ReactNode } from 'react'
 import { MemoryRouter, type MemoryRouterProps } from 'react-router-dom'
 import { ThemeProvider } from 'styled-components'
-import { AuthProvider } from '../hooks/useAuth'
+import { AuthProvider } from '../hooks/AuthProvider'
 import { GlobalStyle } from '../styles/GlobalStyle'
 import { theme } from '../styles/theme'
 

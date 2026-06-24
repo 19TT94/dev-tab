@@ -7,7 +7,7 @@ import {
 } from '../useInvoices'
 import { useClients } from '../useClients'
 import { useProjects } from '../useProjects'
-import { AuthProvider } from '../useAuth'
+import { AuthProvider } from '../AuthProvider'
 import { createTestQueryClient } from '../../test/render'
 
 function wrapper({ children }: { children: React.ReactNode }) {

@@ -1,7 +1,7 @@
 import { renderHook, waitFor } from '@testing-library/react'
 import { describe, expect, it } from 'vitest'
 import { useClients, useClientMutations } from '../useClients'
-import { AuthProvider } from '../useAuth'
+import { AuthProvider } from '../AuthProvider'
 import { QueryClientProvider } from '@tanstack/react-query'
 import { createTestQueryClient } from '../../test/render'
 

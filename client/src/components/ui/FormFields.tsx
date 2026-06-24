@@ -1,21 +1,6 @@
-import styled, { css } from 'styled-components'
+import styled from 'styled-components'
 
-const fieldBase = css`
-  width: 100%;
-  border-radius: ${({ theme }) => theme.radii.lg};
-  border: 1px solid ${({ theme }) => theme.colors.border};
-  padding: 0.5rem 0.75rem;
-  font-size: ${({ theme }) => theme.fontSizes.sm};
-  box-shadow: ${({ theme }) => theme.shadows.sm};
-  background: ${({ theme }) => theme.colors.tertiary};
-  color: ${({ theme }) => theme.colors.secondary};
-
-  &:focus {
-    outline: none;
-    border-color: ${({ theme }) => theme.colors.primary};
-    box-shadow: 0 0 0 1px ${({ theme }) => theme.colors.primary};
-  }
-`
+import { fieldBase } from './InlineFields'
 
 const FieldGroup = styled.div`
   display: flex;
@@ -103,10 +88,3 @@ export function Textarea({ label, id, ...props }: TextareaProps) {
   )
 }
 
-export const InlineInput = styled.input`
-  ${fieldBase}
-`
-
-export const InlineSelect = styled.select`
-  ${fieldBase}
-`
