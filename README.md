@@ -99,8 +99,14 @@ devtab/
 └── README.md
 ```
 
+## Mocking
+
+This project uses your browser cache to mock data for testing. Mock data is defined in `mockStore.ts`. To enable mock data, set `VITE_USE_MOCK_DATA=true` in your environment variables.
+
+Mock data can be reset by clicking the "Reset mock data" button in the top right corner of the app.
+
 ## Notes
 
-- Supabase free tier pauses after 1 week of inactivity — use the app regularly or upgrade
+- Supabase free tier pauses after 1 week of inactivity — use the app regularly or upgrade (TODO: add ping to check on page load and refresh)
 - Time entries linked to an invoice cannot be edited or deleted until the invoice is deleted
-- Invoice numbers auto-increment per year (e.g. `INV-2026-001`)
+- Invoice numbers auto-increment per year (e.g. `INV-2026-001`) or via ENV config

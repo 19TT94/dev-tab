@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
+import styled from 'styled-components'
 
 import tailLogo from '../assets/tail-bw.png'
 
@@ -61,9 +62,15 @@ const Login = () => {
 
         <AuthSubtitle>
           {isMockMode
-            ? 'Mock mode — sign in with any credentials'
+            ? 'Sign in with any credentials'
             : 'Sign in to track your time'}
         </AuthSubtitle>
+
+        {isMockMode && (
+          <MockBanner $variant="warning">
+            Mock mode — sign in with any credentials
+          </MockBanner>
+        )}
 
         <FormStack onSubmit={handleSubmit}>
           <Input
@@ -91,5 +98,10 @@ const Login = () => {
     </CenteredPage>
   )
 }
+
+// Style Overrides
+const MockBanner = styled(Alert)`
+  margin: 1rem 0;
+`
 
 export default Login

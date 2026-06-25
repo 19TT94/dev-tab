@@ -51,6 +51,9 @@ export {
   CompactTh,
   CompactTd,
 } from './Table'
+export { BaseTable } from './BaseTable'
+export type { BaseTableProps, TableColumn } from './BaseTable'
+export { Pagination } from './Pagination'
 export {
   Spinner,
   LoadingScreen,

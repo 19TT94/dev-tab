@@ -14,12 +14,10 @@ import { Button } from './Button'
 import { Input, Select, Textarea, InlineInput } from './FormFields'
 import { Inline } from './ui/Layout'
 import {
+  BaseTable,
   ButtonRow,
-  CompactTable,
-  CompactTd,
-  CompactTh,
   Grid,
-  TableWrapper,
+  type TableColumn,
 } from './ui'
 
 // Utils
@@ -98,6 +96,69 @@ export const InvoiceWizard = ({ onClose }: InvoiceWizardProps) => {
     ...clients.map((c) => ({ value: c.id, label: c.name })),
   ]
 
+  const lineItemColumns = useMemo<TableColumn<DraftLineItem>[]>(
+    () => [
+      {
+        key: 'description',
+        header: 'Description',
+        render: (item) => {
+          const index = lineItems.indexOf(item)
+          return (
+            <InlineInput
+              value={item.description}
+              onChange={(event) =>
+                updateLineItem(index, 'description', event.target.value)
+              }
+            />
+          )
+        },
+      },
+      {
+        key: 'hours',
+        header: 'Hours',
+        align: 'right',
+        render: (item) => {
+          const index = lineItems.indexOf(item)
+          return (
+            <NumericInput
+              type="number"
+              step="0.01"
+              value={item.hours}
+              onChange={(event) =>
+                updateLineItem(index, 'hours', parseFloat(event.target.value) || 0)
+              }
+            />
+          )
+        },
+      },
+      {
+        key: 'rate',
+        header: 'Rate',
+        align: 'right',
+        render: (item) => {
+          const index = lineItems.indexOf(item)
+          return (
+            <NumericInput
+              type="number"
+              step="0.01"
+              value={item.rate}
+              onChange={(event) =>
+                updateLineItem(index, 'rate', parseFloat(event.target.value) || 0)
+              }
+            />
+          )
+        },
+      },
+      {
+        key: 'amount',
+        header: 'Amount',
+        align: 'right',
+        render: (item) => <AmountCell>{formatCurrency(item.amount)}</AmountCell>,
+      },
+    ],
+    [lineItems],
+  )
+
   return (
     <>
       <Grid $cols={2} style={{ marginBottom: '1rem' }}>
@@ -150,55 +211,14 @@ export const InvoiceWizard = ({ onClose }: InvoiceWizardProps) => {
 
       {loaded && lineItems.length > 0 && (
         <>
-          <TableWrapper style={{ marginBottom: '1rem' }}>
-            <CompactTable>
-              <thead>
-                <tr>
-                  <CompactTh>Description</CompactTh>
-                  <CompactTh $align="right">Hours</CompactTh>
-                  <CompactTh $align="right">Rate</CompactTh>
-                  <CompactTh $align="right">Amount</CompactTh>
-                </tr>
-              </thead>
-              <tbody>
-                {lineItems.map((item, i) => (
-                  <tr key={`${item.project_id}-${item.rate}-${i}`}>
-                    <CompactTd>
-                      <InlineInput
-                        value={item.description}
-                        onChange={(e) => updateLineItem(i, 'description', e.target.value)}
-                      />
-                    </CompactTd>
-                    <CompactTd $align="right">
-                      <InlineInput
-                        style={{ width: '5rem', textAlign: 'right' }}
-                        type="number"
-                        step="0.01"
-                        value={item.hours}
-                        onChange={(e) =>
-                          updateLineItem(i, 'hours', parseFloat(e.target.value) || 0)
-                        }
-                      />
-                    </CompactTd>
-                    <CompactTd $align="right">
-                      <InlineInput
-                        style={{ width: '5rem', textAlign: 'right' }}
-                        type="number"
-                        step="0.01"
-                        value={item.rate}
-                        onChange={(e) =>
-                          updateLineItem(i, 'rate', parseFloat(e.target.value) || 0)
-                        }
-                      />
-                    </CompactTd>
-                    <CompactTd $align="right" style={{ fontWeight: 500 }}>
-                      {formatCurrency(item.amount)}
-                    </CompactTd>
-                  </tr>
-                ))}
-              </tbody>
-            </CompactTable>
-          </TableWrapper>
+          <LineItemsTable>
+            <BaseTable
+              columns={lineItemColumns}
+              data={lineItems}
+              rowKey={(item) => item.time_entry_ids.join('-')}
+              emptyMessage="No line items."
+            />
+          </LineItemsTable>
 
           <Textarea
             label="Notes (optional)"
@@ -225,6 +245,19 @@ export const InvoiceWizard = ({ onClose }: InvoiceWizardProps) => {
 }
 
 // Style Overrides
+const LineItemsTable = styled.div`
+  margin-bottom: 1rem;
+`
+
+const NumericInput = styled(InlineInput)`
+  width: 5rem;
+  text-align: right;
+`
+
+const AmountCell = styled.span`
+  font-weight: ${({ theme }) => theme.fontWeights.medium};
+`
+
 const TotalRow = styled.div`
   display: flex;
   align-items: center;
