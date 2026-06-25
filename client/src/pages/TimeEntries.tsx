@@ -1,8 +1,9 @@
-import { useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import styled from 'styled-components'
 
 // Hooks
 import { useTimeEntries, useTimeEntryMutations } from '../hooks/useTimeEntries'
+import { useTableState } from '../hooks/useTableState'
 
 // Types
 import type { TimeEntryWithProject } from '../types/database'
@@ -11,8 +12,11 @@ import type { TimeEntryWithProject } from '../types/database'
 import { ModalAddEntry } from '../components/ModalAddEntry'
 import { Button } from '../components/Button'
 import {
+  BaseTable,
   ButtonRow,
   Card,
+  InlineInput,
+  InlineSelect,
   MonoText,
   MutedHint,
   PageContainer,
@@ -20,29 +24,102 @@ import {
   PageStack,
   PageSubtitle,
   PageTitle,
+  Pagination,
   StatusNo,
   StatusYes,
-  Table,
-  TableBody,
-  TableHead,
-  TableWrapper,
-  Td,
-  Text,
-  Th,
+  type TableColumn,
 } from '../components/ui'
 
 // Utils
+import {
+  getDayOptions,
+  getMonthOptions,
+  getYearsFromDates,
+  matchesDateParts,
+} from '../lib/tableUtils'
 import {
   formatDateTime,
   formatDuration,
   formatHours,
 } from '../lib/utils'
 
+const PAGE_SIZE = 10
+const MONTH_OPTIONS = getMonthOptions()
+const DAY_OPTIONS = getDayOptions()
+
+const searchTimeEntry = (entry: TimeEntryWithProject, query: string) => {
+  const haystack = [
+    entry.projects.name,
+    entry.projects.clients.name,
+    entry.description ?? '',
+  ]
+    .join(' ')
+    .toLowerCase()
+
+  return haystack.includes(query)
+}
+
 const TimeEntriesPage = () => {
   const { data: entries = [], isLoading } = useTimeEntries()
   const { create, update, remove } = useTimeEntryMutations()
   const [modalOpen, setModalOpen] = useState(false)
   const [editing, setEditing] = useState<TimeEntryWithProject | null>(null)
+  const [year, setYear] = useState('')
+  const [month, setMonth] = useState('')
+  const [day, setDay] = useState('')
+
+  const yearOptions = useMemo(
+    () => getYearsFromDates(entries.map((entry) => entry.started_at)),
+    [entries],
+  )
+
+  const dateFilter = useMemo(
+    () => ({ year, month, day }),
+    [year, month, day],
+  )
+
+  const filterByDate = useCallback(
+    (entry: TimeEntryWithProject) =>
+      matchesDateParts(entry.started_at, dateFilter),
+    [dateFilter],
+  )
+
+  const sortAccessors = useMemo(
+    () => ({
+      project: (entry: TimeEntryWithProject) => entry.projects.name.toLowerCase(),
+      description: (entry: TimeEntryWithProject) =>
+        (entry.description ?? '').toLowerCase(),
+      when: (entry: TimeEntryWithProject) =>
+        new Date(entry.started_at).getTime(),
+      duration: (entry: TimeEntryWithProject) => entry.duration_seconds,
+      billable: (entry: TimeEntryWithProject) => (entry.billable ? 1 : 0),
+    }),
+    [],
+  )
+
+  const {
+    search,
+    setSearch,
+    sortKey,
+    sortDirection,
+    toggleSort,
+    page,
+    setPage,
+    pageTotal,
+    totalCount,
+    rows,
+  } = useTableState(entries, {
+    pageSize: PAGE_SIZE,
+    initialSortKey: 'when',
+    initialSortDirection: 'desc',
+    filterFn: filterByDate,
+    searchFn: searchTimeEntry,
+    sortAccessors,
+  })
+
+  useEffect(() => {
+    setPage(1)
+  }, [year, month, day, setPage])
 
   const closeModal = () => {
     setModalOpen(false)
@@ -67,10 +144,106 @@ const TimeEntriesPage = () => {
     closeModal()
   }
 
-  const handleDelete = async (id: string) => {
+  const handleDelete = useCallback(async (id: string) => {
     if (!confirm('Delete this time entry?')) return
     await remove.mutateAsync(id)
-  }
+  }, [remove])
+
+  const columns = useMemo<TableColumn<TimeEntryWithProject>[]>(
+    () => [
+      {
+        key: 'project',
+        header: 'Project',
+        sortable: true,
+        render: (entry) => (
+          <>
+            <ProjectName>{entry.projects.name}</ProjectName>
+            <ClientName>{entry.projects.clients.name}</ClientName>
+          </>
+        ),
+      },
+      {
+        key: 'description',
+        header: 'Description',
+        sortable: true,
+        render: (entry) => entry.description || '—',
+      },
+      {
+        key: 'when',
+        header: 'When',
+        sortable: true,
+        render: (entry) => formatDateTime(entry.started_at),
+      },
+      {
+        key: 'duration',
+        header: 'Duration',
+        sortable: true,
+        align: 'right',
+        render: (entry) => (
+          <>
+            <MonoText>{formatDuration(entry.duration_seconds)}</MonoText>
+            <MutedHint>
+              <br />
+              {formatHours(entry.duration_seconds)} hrs
+            </MutedHint>
+          </>
+        ),
+      },
+      {
+        key: 'billable',
+        header: 'Billable',
+        sortable: true,
+        render: (entry) => (
+          <>
+            {entry.billable ? <StatusYes>Yes</StatusYes> : <StatusNo>No</StatusNo>}
+            {entry.invoice_id && (
+              <MutedHint>
+                <br />
+                Invoiced
+              </MutedHint>
+            )}
+          </>
+        ),
+      },
+      {
+        key: 'actions',
+        header: '',
+        render: (entry) => (
+          <ButtonRow>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => {
+                setEditing(entry)
+                setModalOpen(true)
+              }}
+              disabled={!!entry.invoice_id}
+            >
+              Edit
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => handleDelete(entry.id)}
+              disabled={!!entry.invoice_id}
+            >
+              Delete
+            </Button>
+          </ButtonRow>
+        ),
+      },
+    ],
+    [handleDelete],
+  )
+
+  const hasFilters = search.length > 0 || year !== '' || month !== '' || day !== ''
+
+  const emptyMessage =
+    entries.length === 0
+      ? 'No time entries yet.'
+      : hasFilters
+        ? 'No time entries match your filters.'
+        : 'No time entries found.'
 
   return (
     <PageContainer $maxWidth="48rem">
@@ -98,76 +271,70 @@ const TimeEntriesPage = () => {
         />
 
         <Card>
-          {isLoading ? (
-            <Text $color="muted" style={{ padding: '1.25rem' }}>Loading...</Text>
-          ) : entries.length === 0 ? (
-            <Text $color="muted" style={{ padding: '1.25rem' }}>No time entries yet.</Text>
-          ) : (
-            <TableWrapper>
-              <Table>
-                <TableHead>
-                  <tr>
-                    <Th>Project</Th>
-                    <Th>Description</Th>
-                    <Th>When</Th>
-                    <Th $align="right">Duration</Th>
-                    <Th>Billable</Th>
-                    <Th />
-                  </tr>
-                </TableHead>
-                <TableBody>
-                  {entries.map((entry) => (
-                    <tr key={entry.id}>
-                      <Td data-emphasis="true">
-                        <ProjectName>{entry.projects.name}</ProjectName>
-                        <ClientName>{entry.projects.clients.name}</ClientName>
-                      </Td>
-                      <Td>{entry.description || '—'}</Td>
-                      <Td>{formatDateTime(entry.started_at)}</Td>
-                      <Td $align="right" data-emphasis="true">
-                        <MonoText>{formatDuration(entry.duration_seconds)}</MonoText>
-                        <MutedHint>
-                          <br />
-                          {formatHours(entry.duration_seconds)} hrs
-                        </MutedHint>
-                      </Td>
-                      <Td>
-                        {entry.billable ? <StatusYes>Yes</StatusYes> : <StatusNo>No</StatusNo>}
-                        {entry.invoice_id && (
-                          <MutedHint>
-                            <br />
-                            Invoiced
-                          </MutedHint>
-                        )}
-                      </Td>
-                      <Td>
-                        <ButtonRow>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => {
-                              setEditing(entry)
-                              setModalOpen(true)
-                            }}
-                            disabled={!!entry.invoice_id}
-                          >
-                            Edit
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => handleDelete(entry.id)}
-                            disabled={!!entry.invoice_id}
-                          >
-                            Delete
-                          </Button>
-                        </ButtonRow>
-                      </Td>
-                    </tr>
+          <BaseTable
+            columns={columns}
+            data={rows}
+            rowKey={(entry) => entry.id}
+            loading={isLoading}
+            emptyMessage={emptyMessage}
+            sortKey={sortKey}
+            sortDirection={sortDirection}
+            onSort={toggleSort}
+            toolbar={
+              <ToolbarRow>
+                <SearchInput
+                  type="search"
+                  value={search}
+                  placeholder="Search by project, client, or description"
+                  aria-label="Search by project, client, or description"
+                  onChange={(event) => setSearch(event.target.value)}
+                />
+                <FilterSelect
+                  value={year}
+                  aria-label="Filter by year"
+                  onChange={(event) => setYear(event.target.value)}
+                >
+                  <option value="">All years</option>
+                  {yearOptions.map((option) => (
+                    <option key={option} value={String(option)}>
+                      {option}
+                    </option>
                   ))}
-                </TableBody>
-              </Table>
-            </TableWrapper>
+                </FilterSelect>
+                <FilterSelect
+                  value={month}
+                  aria-label="Filter by month"
+                  onChange={(event) => setMonth(event.target.value)}
+                >
+                  <option value="">All months</option>
+                  {MONTH_OPTIONS.map((option) => (
+                    <option key={option.value} value={option.value}>
+                      {option.label}
+                    </option>
+                  ))}
+                </FilterSelect>
+                <FilterSelect
+                  value={day}
+                  aria-label="Filter by day"
+                  onChange={(event) => setDay(event.target.value)}
+                >
+                  <option value="">All days</option>
+                  {DAY_OPTIONS.map((option) => (
+                    <option key={option.value} value={option.value}>
+                      {option.label}
+                    </option>
+                  ))}
+                </FilterSelect>
+              </ToolbarRow>
+            }
+          />
+          {!isLoading && totalCount > 0 && (
+            <Pagination
+              current={page}
+              pageTotal={pageTotal}
+              onPageChange={setPage}
+              loading={isLoading}
+            />
           )}
         </Card>
       </PageStack>
@@ -176,6 +343,23 @@ const TimeEntriesPage = () => {
 }
 
 // Style Overrides
+const ToolbarRow = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  align-items: center;
+`
+
+const SearchInput = styled(InlineInput)`
+  flex: 1 1 12rem;
+  max-width: 20rem;
+`
+
+const FilterSelect = styled(InlineSelect)`
+  width: auto;
+  min-width: 7rem;
+`
+
 const ProjectName = styled.div`
   font-weight: ${({ theme }) => theme.fontWeights.medium};
   color: ${({ theme }) => theme.colors.secondary};

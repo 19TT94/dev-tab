@@ -10,7 +10,7 @@ import type {
   TimeEntry,
   TimeEntryWithProject,
 } from '../types/database'
-import { MOCK_USER_ID } from './config'
+import { INVOICE_NUMBER_START, MOCK_USER_ID } from './config'
 
 const STORAGE_KEY = 'personal-invoice-mock-data'
 
@@ -190,6 +190,10 @@ function withProject(entry: TimeEntry, data: MockData): TimeEntryWithProject {
 }
 
 export const mockStore = {
+  reset(): void {
+    save(createSeedData())
+  },
+
   getClients(): Client[] {
     const data = load()
     return [...data.clients].sort((a, b) => a.name.localeCompare(b.name))
@@ -468,7 +472,9 @@ export const mockStore = {
     const matching = data.invoices
       .filter((i) => i.invoice_number.startsWith(prefix))
       .sort((a, b) => b.invoice_number.localeCompare(a.invoice_number))
-    if (!matching.length) return `${prefix}001`
+    if (!matching.length) {
+      return `${prefix}${String(INVOICE_NUMBER_START).padStart(3, '0')}`
+    }
     const num = parseInt(matching[0].invoice_number.replace(prefix, ''), 10)
     return `${prefix}${String(num + 1).padStart(3, '0')}`
   },

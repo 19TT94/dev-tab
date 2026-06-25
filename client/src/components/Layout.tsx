@@ -13,6 +13,7 @@ import { Alert } from './ui'
 
 // Utils
 import { isMockMode } from '../lib/config'
+import { mockStore } from '../lib/mockStore'
 
 type NavIconName = 'dashboard' | 'time' | 'clients' | 'reports' | 'invoices'
 
@@ -42,6 +43,12 @@ export const Layout = ({ children }: { children: React.ReactNode }) => {
   if (location.pathname !== lastPath) {
     setLastPath(location.pathname)
     setIsDrawerOpen(false)
+  }
+
+  const handleClearMock = () => {
+    if (!confirm('Reset mock data to its default seed? This cannot be undone.')) return
+    mockStore.reset()
+    window.location.reload()
   }
 
   return (
@@ -116,7 +123,12 @@ export const Layout = ({ children }: { children: React.ReactNode }) => {
         </MobileMenuBar>
         {isMockMode && (
           <MockBanner $variant="warning">
-            Mock mode — data is stored locally in your browser, not Supabase.
+            <MockBannerText>
+              Mock mode — data is stored locally in your browser, not Supabase.
+            </MockBannerText>
+            <ClearMockButton type="button" onClick={handleClearMock}>
+              Clear mock data
+            </ClearMockButton>
           </MockBanner>
         )}
         {children}
@@ -457,5 +469,29 @@ const Main = styled.main`
 `
 
 const MockBanner = styled(Alert)`
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
   margin-bottom: 1rem;
+`
+
+const MockBannerText = styled.span`
+  min-width: 0;
+`
+
+const ClearMockButton = styled.button`
+  flex-shrink: 0;
+  border: 1px solid ${({ theme }) => theme.colors.accent};
+  border-radius: ${({ theme }) => theme.radii.md};
+  padding: 0.25rem 0.625rem;
+  background: ${({ theme }) => theme.colors.tertiary};
+  color: ${({ theme }) => theme.colors.secondary};
+  font-size: ${({ theme }) => theme.fontSizes.xs};
+  font-weight: ${({ theme }) => theme.fontWeights.medium};
+  cursor: pointer;
+
+  &:hover {
+    filter: brightness(0.92);
+  }
 `

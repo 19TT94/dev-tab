@@ -6,10 +6,14 @@ import { useClients } from '../hooks/useClients'
 import { useProjects } from '../hooks/useProjects'
 import { useTimeEntries } from '../hooks/useTimeEntries'
 
+// Types
+import type { TimeEntryWithProject } from '../types/database'
+
 // Components
 import { Button } from '../components/Button'
 import { Input, Select } from '../components/FormFields'
 import {
+  BaseTable,
   Card,
   Checkbox,
   CheckboxLabel,
@@ -22,13 +26,7 @@ import {
   StatCard,
   StatLabel,
   StatValue,
-  Table,
-  TableBody,
-  TableHead,
-  TableWrapper,
-  Td,
-  Text,
-  Th,
+  type TableColumn,
 } from '../components/ui'
 
 // Utils
@@ -37,6 +35,7 @@ import {
   entryBillableAmount,
   totalRevenueFromEntries,
 } from '../lib/billing'
+import { sortRows, type SortDirection } from '../lib/tableUtils'
 import {
   downloadCsv,
   formatCurrency,
@@ -59,6 +58,8 @@ const ReportsPage = () => {
   })
   const [endDate, setEndDate] = useState(toDateInputValue(new Date()))
   const [billableOnly, setBillableOnly] = useState(false)
+  const [sortKey, setSortKey] = useState('date')
+  const [sortDirection, setSortDirection] = useState<SortDirection>('desc')
 
   const { data: entries = [], isLoading } = useTimeEntries({
     clientId: clientId || undefined,
@@ -104,6 +105,94 @@ const ReportsPage = () => {
     { value: '', label: 'All projects' },
     ...filteredProjects.map((p) => ({ value: p.id, label: p.name })),
   ]
+
+  const sortAccessors = useMemo(
+    () => ({
+      client: (entry: TimeEntryWithProject) =>
+        entry.projects.clients.name.toLowerCase(),
+      project: (entry: TimeEntryWithProject) => entry.projects.name.toLowerCase(),
+      date: (entry: TimeEntryWithProject) => new Date(entry.started_at).getTime(),
+      duration: (entry: TimeEntryWithProject) => entry.duration_seconds,
+      amount: (entry: TimeEntryWithProject) => {
+        const segments = segmentsByEntryId.get(entry.id) ?? []
+        return entry.billable ? entryBillableAmount(entry, segments) : 0
+      },
+    }),
+    [segmentsByEntryId],
+  )
+
+  const sortedEntries = useMemo(() => {
+    if (!sortKey || !sortAccessors[sortKey as keyof typeof sortAccessors]) {
+      return entries
+    }
+    return sortRows(
+      entries,
+      sortDirection,
+      sortAccessors[sortKey as keyof typeof sortAccessors],
+    )
+  }, [entries, sortKey, sortDirection, sortAccessors])
+
+  const toggleSort = (key: string) => {
+    if (sortKey === key) {
+      setSortDirection((direction) => (direction === 'asc' ? 'desc' : 'asc'))
+    } else {
+      setSortKey(key)
+      setSortDirection('asc')
+    }
+  }
+
+  const columns = useMemo<TableColumn<TimeEntryWithProject>[]>(
+    () => [
+      {
+        key: 'client',
+        header: 'Client',
+        sortable: true,
+        render: (entry) => <Emphasis>{entry.projects.clients.name}</Emphasis>,
+      },
+      {
+        key: 'project',
+        header: 'Project',
+        sortable: true,
+        render: (entry) => entry.projects.name,
+      },
+      {
+        key: 'date',
+        header: 'Date',
+        sortable: true,
+        render: (entry) => formatDate(entry.started_at),
+      },
+      {
+        key: 'duration',
+        header: 'Duration',
+        sortable: true,
+        align: 'right',
+        render: (entry) => (
+          <Emphasis>
+            <MonoText>{formatDuration(entry.duration_seconds)}</MonoText>
+          </Emphasis>
+        ),
+      },
+      {
+        key: 'amount',
+        header: 'Amount',
+        sortable: true,
+        align: 'right',
+        render: (entry) => {
+          const segments = segmentsByEntryId.get(entry.id) ?? []
+          const amount = entry.billable
+            ? entryBillableAmount(entry, segments)
+            : 0
+
+          return (
+            <Emphasis>
+              {entry.billable ? formatCurrency(amount) : '—'}
+            </Emphasis>
+          )
+        },
+      },
+    ],
+    [segmentsByEntryId],
+  )
 
   const exportCsv = () => {
     const rows: string[][] = [
@@ -203,47 +292,16 @@ const ReportsPage = () => {
         </ExportRow>
 
         <Card>
-          {isLoading ? (
-            <Text $color="muted" style={{ padding: '1.25rem' }}>Loading...</Text>
-          ) : entries.length === 0 ? (
-            <Text $color="muted" style={{ padding: '1.25rem' }}>No entries match your filters.</Text>
-          ) : (
-            <TableWrapper>
-              <Table>
-                <TableHead>
-                  <tr>
-                    <Th>Client</Th>
-                    <Th>Project</Th>
-                    <Th>Date</Th>
-                    <Th $align="right">Duration</Th>
-                    <Th $align="right">Amount</Th>
-                  </tr>
-                </TableHead>
-                <TableBody>
-                  {entries.map((entry) => {
-                    const segments = segmentsByEntryId.get(entry.id) ?? []
-                    const amount = entry.billable
-                      ? entryBillableAmount(entry, segments)
-                      : 0
-
-                    return (
-                      <tr key={entry.id}>
-                        <Td data-emphasis="true">{entry.projects.clients.name}</Td>
-                        <Td>{entry.projects.name}</Td>
-                        <Td>{formatDate(entry.started_at)}</Td>
-                        <Td $align="right" data-emphasis="true">
-                          <MonoText>{formatDuration(entry.duration_seconds)}</MonoText>
-                        </Td>
-                        <Td $align="right" data-emphasis="true">
-                          {entry.billable ? formatCurrency(amount) : '—'}
-                        </Td>
-                      </tr>
-                    )
-                  })}
-                </TableBody>
-              </Table>
-            </TableWrapper>
-          )}
+          <BaseTable
+            columns={columns}
+            data={sortedEntries}
+            rowKey={(entry) => entry.id}
+            loading={isLoading}
+            emptyMessage="No entries match your filters."
+            sortKey={sortKey}
+            sortDirection={sortDirection}
+            onSort={toggleSort}
+          />
         </Card>
       </PageStack>
     </PageContainer>
@@ -258,6 +316,11 @@ const FilterCard = styled(Card)`
 const ExportRow = styled.div`
   display: flex;
   justify-content: flex-end;
+`
+
+const Emphasis = styled.span`
+  color: ${({ theme }) => theme.colors.secondary};
+  font-weight: ${({ theme }) => theme.fontWeights.medium};
 `
 
 export default ReportsPage
