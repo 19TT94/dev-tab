@@ -26,7 +26,6 @@ import {
   StatCard,
   StatLabel,
   StatValue,
-  Text,
   type TableColumn,
 } from '../components/ui'
 
@@ -128,7 +127,6 @@ const ReportsPage = () => {
     }
     return sortRows(
       entries,
-      sortKey,
       sortDirection,
       sortAccessors[sortKey as keyof typeof sortAccessors],
     )

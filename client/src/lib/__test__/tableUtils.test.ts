@@ -25,8 +25,8 @@ describe('tableUtils', () => {
   })
 
   it('sorts rows ascending and descending', () => {
-    const ascending = sortRows(rows, 'value', 'asc', (row) => row.value)
-    const descending = sortRows(rows, 'value', 'desc', (row) => row.value)
+    const ascending = sortRows(rows, 'asc', (row) => row.value)
+    const descending = sortRows(rows, 'desc', (row) => row.value)
 
     expect(ascending.map((row) => row.id)).toEqual(['2', '3', '1'])
     expect(descending.map((row) => row.id)).toEqual(['1', '3', '2'])

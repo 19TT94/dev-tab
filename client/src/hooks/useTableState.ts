@@ -46,7 +46,7 @@ export function useTableState<T>(data: T[], options: UseTableStateOptions<T> = {
 
   const sorted = useMemo(() => {
     if (!sortKey || !sortAccessors[sortKey]) return filtered
-    return sortRows(filtered, sortKey, sortDirection, sortAccessors[sortKey])
+    return sortRows(filtered, sortDirection, sortAccessors[sortKey])
   }, [filtered, sortKey, sortDirection, sortAccessors])
 
   const pageTotal = getPageTotal(sorted.length, pageSize)

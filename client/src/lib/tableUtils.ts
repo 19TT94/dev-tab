@@ -55,7 +55,6 @@ export function filterRows<T>(
 
 export function sortRows<T>(
   rows: T[],
-  sortKey: string,
   sortDirection: SortDirection,
   getValue: (row: T) => string | number,
 ): T[] {
