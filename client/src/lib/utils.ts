@@ -1,4 +1,4 @@
-import { isMockMode } from './config'
+import { INVOICE_NUMBER_START, isMockMode } from './config'
 import { mockStore } from './mockStore'
 import { supabase } from './supabase'
 
@@ -90,7 +90,9 @@ export async function generateInvoiceNumber(userId: string): Promise<string> {
     .order('invoice_number', { ascending: false })
     .limit(1)
 
-  if (!data?.length) return `${prefix}001`
+  if (!data?.length) {
+    return `${prefix}${String(INVOICE_NUMBER_START).padStart(3, '0')}`
+  }
 
   const last = data[0].invoice_number
   const num = parseInt(last.replace(prefix, ''), 10)

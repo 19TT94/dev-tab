@@ -17,12 +17,10 @@ import { Button } from '../components/Button'
 import { downloadInvoicePdf } from '../components/InvoicePdf'
 import {
   Badge,
+  BaseTable,
   ButtonRow,
   Card,
   CardBody,
-  CompactTable,
-  CompactTd,
-  CompactTh,
   LinkButton,
   List,
   ListButton,
@@ -33,6 +31,7 @@ import {
   PageTitle,
   Panel,
   Text,
+  type TableColumn,
 } from '../components/ui'
 
 // Utils
@@ -40,6 +39,34 @@ import {
   formatCurrency,
   formatDate,
 } from '../lib/utils'
+
+type InvoiceLineItemRow = InvoiceWithDetails['invoice_line_items'][number]
+
+const LINE_ITEM_COLUMNS: TableColumn<InvoiceLineItemRow>[] = [
+  {
+    key: 'description',
+    header: 'Description',
+    render: (item) => item.description,
+  },
+  {
+    key: 'hours',
+    header: 'Hours',
+    align: 'right',
+    render: (item) => Number(item.hours).toFixed(2),
+  },
+  {
+    key: 'rate',
+    header: 'Rate',
+    align: 'right',
+    render: (item) => formatCurrency(Number(item.rate)),
+  },
+  {
+    key: 'amount',
+    header: 'Amount',
+    align: 'right',
+    render: (item) => formatCurrency(Number(item.amount)),
+  },
+]
 
 const InvoiceDetail = ({ invoiceId, onBack }: { invoiceId: string; onBack: () => void }) => {
   const { data: invoice, isLoading } = useInvoice(invoiceId)
@@ -82,26 +109,14 @@ const InvoiceDetail = ({ invoiceId, onBack }: { invoiceId: string; onBack: () =>
             </Badge>
           </DetailHeader>
 
-          <CompactTable style={{ marginBottom: '1.5rem', width: '100%' }}>
-            <thead>
-              <tr>
-                <CompactTh>Description</CompactTh>
-                <CompactTh $align="right">Hours</CompactTh>
-                <CompactTh $align="right">Rate</CompactTh>
-                <CompactTh $align="right">Amount</CompactTh>
-              </tr>
-            </thead>
-            <tbody>
-              {invoice.invoice_line_items.map((item) => (
-                <tr key={item.id}>
-                  <CompactTd>{item.description}</CompactTd>
-                  <CompactTd $align="right">{Number(item.hours).toFixed(2)}</CompactTd>
-                  <CompactTd $align="right">{formatCurrency(Number(item.rate))}</CompactTd>
-                  <CompactTd $align="right">{formatCurrency(Number(item.amount))}</CompactTd>
-                </tr>
-              ))}
-            </tbody>
-          </CompactTable>
+          <LineItemsTable>
+            <BaseTable
+              columns={LINE_ITEM_COLUMNS}
+              data={invoice.invoice_line_items}
+              rowKey={(item) => item.id}
+              emptyMessage="No line items."
+            />
+          </LineItemsTable>
 
           <div style={{ marginBottom: '1.5rem', textAlign: 'right' }}>
             <TotalLabel>Total: {formatCurrency(Number(invoice.subtotal))}</TotalLabel>
@@ -220,6 +235,10 @@ const InvoiceMeta = styled.p`
   margin: 0;
   font-size: ${({ theme }) => theme.fontSizes.sm};
   color: ${({ theme }) => theme.colors.muted};
+`
+
+const LineItemsTable = styled.div`
+  margin-bottom: 1.5rem;
 `
 
 const TotalLabel = styled.p`

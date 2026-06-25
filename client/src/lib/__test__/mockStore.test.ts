@@ -1,8 +1,10 @@
 import { beforeEach, describe, expect, it } from 'vitest'
 import { mockStore } from '../mockStore'
-import { MOCK_USER_ID } from '../config'
+import { INVOICE_NUMBER_START, MOCK_USER_ID } from '../config'
 
 const STORAGE_KEY = 'personal-invoice-mock-data'
+const seq = (offset: number) =>
+  String(INVOICE_NUMBER_START + offset).padStart(3, '0')
 
 describe('mockStore', () => {
   beforeEach(() => {
@@ -149,7 +151,9 @@ describe('mockStore', () => {
       ],
     })
 
-    expect(invoice.invoice_number).toMatch(/^INV-\d{4}-001$/)
+    expect(invoice.invoice_number).toMatch(
+      new RegExp(`^INV-\\d{4}-${seq(0)}$`),
+    )
     expect(mockStore.getInvoices()).toHaveLength(1)
 
     const details = mockStore.getInvoice(invoice.id)
@@ -185,6 +189,6 @@ describe('mockStore', () => {
 
     const secondNumber = mockStore.generateInvoiceNumber()
     expect(secondNumber).not.toBe(first.invoice_number)
-    expect(secondNumber.endsWith('002')).toBe(true)
+    expect(secondNumber.endsWith(seq(1))).toBe(true)
   })
 })

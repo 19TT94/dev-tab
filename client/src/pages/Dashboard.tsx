@@ -48,6 +48,7 @@ const Dashboard = () => {
         <Timer />
 
         <Card>
+          {/* TODO: Add Weely & Monthly Preview */}
           <CardHeader $bordered>
             <CardTitle>Today&apos;s entries</CardTitle>
             <Text $color="muted">{formatHours(totalSeconds)} hrs total</Text>

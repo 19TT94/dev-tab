@@ -12,6 +12,7 @@ import {
   startOfDay,
   toDateInputValue,
 } from '../utils'
+import { INVOICE_NUMBER_START } from '../config'
 
 describe('formatDuration', () => {
   it('formats seconds as HH:MM:SS', () => {
@@ -110,6 +111,7 @@ describe('generateInvoiceNumber', () => {
   it('generates first invoice number in mock mode', async () => {
     const number = await generateInvoiceNumber('mock-user-id')
     const year = new Date().getFullYear()
-    expect(number).toBe(`INV-${year}-001`)
+    const start = String(INVOICE_NUMBER_START).padStart(3, '0')
+    expect(number).toBe(`INV-${year}-${start}`)
   })
 })
