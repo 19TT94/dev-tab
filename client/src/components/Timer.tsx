@@ -1,5 +1,5 @@
-import { useState } from 'react'
-import styled from 'styled-components'
+import { useEffect, useRef, useState } from 'react'
+import styled, { css } from 'styled-components'
 
 // Hooks
 import { useProjects } from '../hooks/useProjects'
@@ -9,15 +9,23 @@ import { useTimer } from '../hooks/useTimer'
 import { Button } from './Button'
 import { InlineInput, InlineSelect } from './FormFields'
 import { Card, CardBody } from './ui'
+import { fieldBase } from './ui/InlineFields'
 
 // Utils
 import { formatDuration } from '../lib/utils'
 
+const DESCRIPTION_PLACEHOLDER = 'What are you working on?'
+
 export const Timer = () => {
   const { data: projects = [] } = useProjects()
-  const { activeTimer, elapsed, start, stop } = useTimer()
+  const { activeTimer, elapsed, start, stop, updateDescription } = useTimer()
   const [projectId, setProjectId] = useState('')
   const [description, setDescription] = useState('')
+  const [isEditingDescription, setIsEditingDescription] = useState(false)
+  const descriptionInputRef = useRef<HTMLInputElement>(null)
+
+  const showDescriptionInput = !activeTimer || isEditingDescription
+  const savedDescription = activeTimer?.description?.trim() ?? ''
 
   const projectOptions = [
     { value: '', label: 'Project...' },
@@ -28,6 +36,18 @@ export const Timer = () => {
   ]
 
   const activeProject = projects.find((p) => p.id === activeTimer?.project_id)
+
+  useEffect(() => {
+    if (!activeTimer) {
+      setIsEditingDescription(false)
+    }
+  }, [activeTimer])
+
+  useEffect(() => {
+    if (isEditingDescription) {
+      descriptionInputRef.current?.focus()
+    }
+  }, [isEditingDescription])
 
   const handleStart = async () => {
     if (!projectId) return
@@ -50,25 +70,79 @@ export const Timer = () => {
     }
   }
 
+  const handleDescriptionDisplayClick = () => {
+    setDescription(activeTimer?.description ?? '')
+    setIsEditingDescription(true)
+  }
+
+  const saveActiveDescription = async () => {
+    if (!activeTimer) return
+
+    const nextDescription = description.trim()
+    const currentDescription = activeTimer.description?.trim() ?? ''
+
+    if (nextDescription === currentDescription) {
+      setIsEditingDescription(false)
+      return
+    }
+
+    try {
+      await updateDescription.mutateAsync({
+        description: nextDescription || undefined,
+      })
+      setIsEditingDescription(false)
+    } catch (err) {
+      alert(err instanceof Error ? err.message : 'Failed to update description')
+    }
+  }
+
+  const handleDescriptionBlur = () => {
+    if (activeTimer && isEditingDescription) {
+      void saveActiveDescription()
+    }
+  }
+
+  const handleDescriptionKeyDown = (
+    event: React.KeyboardEvent<HTMLInputElement>,
+  ) => {
+    if (event.key === 'Enter') {
+      event.currentTarget.blur()
+    }
+
+    if (event.key === 'Escape') {
+      setDescription(activeTimer?.description ?? '')
+      setIsEditingDescription(false)
+    }
+  }
+
   return (
     <Card>
       <CardBody $padding="1.5rem">
         <TimerDisplay>
           <TimerValue>{formatDuration(elapsed)}</TimerValue>
-          {activeTimer && activeProject && (
-            <TimerMeta>
-              {activeProject.name} — {activeProject.clients.name}
-              {activeTimer.description && ` · ${activeTimer.description}`}
-            </TimerMeta>
-          )}
         </TimerDisplay>
         <Controls>
           <FieldRow>
-            <Description
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              placeholder="What are you working on?"
-            />
+            {showDescriptionInput ? (
+              <Description
+                ref={descriptionInputRef}
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+                onBlur={handleDescriptionBlur}
+                onKeyDown={handleDescriptionKeyDown}
+                placeholder={DESCRIPTION_PLACEHOLDER}
+                disabled={updateDescription.isPending}
+              />
+            ) : (
+              <DescriptionDisplay
+                type="button"
+                title="Click to edit description"
+                onClick={handleDescriptionDisplayClick}
+                $isPlaceholder={!savedDescription}
+              >
+                {savedDescription || DESCRIPTION_PLACEHOLDER}
+              </DescriptionDisplay>
+            )}
             <ProjectSelect
               aria-label="Project"
               value={projectId}
@@ -117,13 +191,6 @@ const TimerValue = styled.div`
   color: ${({ theme }) => theme.colors.secondary};
 `
 
-const TimerMeta = styled.p`
-  margin: 0.5rem 0 0;
-  font-size: ${({ theme }) => theme.fontSizes.sm};
-  color: ${({ theme }) => theme.colors.muted};
-  overflow-wrap: anywhere;
-`
-
 const Controls = styled.div`
   display: flex;
   flex-direction: column;
@@ -157,7 +224,7 @@ const FieldRow = styled.div`
   }
 `
 
-const Description = styled(InlineInput)`
+const descriptionFieldLayout = css`
   width: 100%;
 
   @media (min-width: ${({ theme }) => theme.breakpoints.sm}) {
@@ -167,12 +234,30 @@ const Description = styled(InlineInput)`
   }
 `
 
+const Description = styled(InlineInput)`
+  ${descriptionFieldLayout}
+`
+
+const DescriptionDisplay = styled.button<{ $isPlaceholder: boolean }>`
+  ${fieldBase}
+  ${descriptionFieldLayout}
+  text-align: left;
+  cursor: pointer;
+
+  color: ${({ theme, $isPlaceholder }) =>
+    $isPlaceholder ? theme.colors.muted : theme.colors.secondary};
+
+  &:hover {
+    filter: brightness(0.92);
+  }
+`
+
 const ProjectSelect = styled(InlineSelect)`
   width: 100%;
 
   @media (min-width: ${({ theme }) => theme.breakpoints.sm}) {
     width: auto;
     flex-shrink: 0;
-    max-width: 120px;
+    max-width: 210px;
   }
 `

@@ -10,6 +10,7 @@ import type { TimeEntryWithProject } from '../types/database'
 
 // Components
 import { ModalAddEntry } from '../components/ModalAddEntry'
+import { EntryOverageIndicator } from '../components/EntryOverageIndicator'
 import { Button } from '../components/Button'
 import {
   BaseTable,
@@ -31,6 +32,7 @@ import {
 } from '../components/ui'
 
 // Utils
+import { billEntriesForReport } from '../lib/billing'
 import {
   getDayOptions,
   getMonthOptions,
@@ -67,6 +69,11 @@ const TimeEntriesPage = () => {
   const [year, setYear] = useState('')
   const [month, setMonth] = useState('')
   const [day, setDay] = useState('')
+
+  const segmentsByEntryId = useMemo(
+    () => billEntriesForReport(entries),
+    [entries],
+  )
 
   const yearOptions = useMemo(
     () => getYearsFromDates(entries.map((entry) => entry.started_at)),
@@ -196,6 +203,12 @@ const TimeEntriesPage = () => {
         render: (entry) => (
           <>
             {entry.billable ? <StatusYes>Yes</StatusYes> : <StatusNo>No</StatusNo>}
+            {entry.billable && (
+              <EntryOverageIndicator
+                segments={segmentsByEntryId.get(entry.id) ?? []}
+                totalSeconds={entry.duration_seconds}
+              />
+            )}
             {entry.invoice_id && (
               <MutedHint>
                 <br />
@@ -233,7 +246,7 @@ const TimeEntriesPage = () => {
         ),
       },
     ],
-    [handleDelete],
+    [handleDelete, segmentsByEntryId],
   )
 
   const hasFilters = search.length > 0 || year !== '' || month !== '' || day !== ''

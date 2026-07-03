@@ -38,6 +38,7 @@ export {
   StatusYes,
   StatusNo,
   MutedHint,
+  OverageBadge,
 } from './Badge'
 export type { BadgeVariant } from './Badge'
 export {

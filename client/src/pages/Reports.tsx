@@ -11,6 +11,7 @@ import type { TimeEntryWithProject } from '../types/database'
 
 // Components
 import { Button } from '../components/Button'
+import { EntryOverageIndicator } from '../components/EntryOverageIndicator'
 import { Input, Select } from '../components/FormFields'
 import {
   BaseTable,
@@ -19,6 +20,7 @@ import {
   CheckboxLabel,
   Grid,
   MonoText,
+  MutedHint,
   PageContainer,
   PageStack,
   PageSubtitle,
@@ -26,6 +28,7 @@ import {
   StatCard,
   StatLabel,
   StatValue,
+  Text,
   type TableColumn,
 } from '../components/ui'
 
@@ -33,6 +36,10 @@ import {
 import {
   billEntriesForReport,
   entryBillableAmount,
+  entryHasOverage,
+  emptyRetainerSummary,
+  hasRetainerBilling,
+  summarizeRetainerUsage,
   totalRevenueFromEntries,
 } from '../lib/billing'
 import { sortRows, type SortDirection } from '../lib/tableUtils'
@@ -91,6 +98,24 @@ const ReportsPage = () => {
     () => billEntriesForReport(entries),
     [entries],
   )
+
+  const retainerSummaries = useMemo(() => {
+    const summaries = summarizeRetainerUsage(entries)
+
+    if (!clientId) return summaries
+
+    const client = clients.find((c) => c.id === clientId)
+    if (
+      client &&
+      hasRetainerBilling(client) &&
+      !summaries.some((summary) => summary.clientId === clientId)
+    ) {
+      const empty = emptyRetainerSummary(client)
+      if (empty) return [empty]
+    }
+
+    return summaries
+  }, [entries, clientId, clients])
 
   const clientOptions = [
     { value: '', label: 'All clients' },
@@ -184,9 +209,18 @@ const ReportsPage = () => {
             : 0
 
           return (
-            <Emphasis>
-              {entry.billable ? formatCurrency(amount) : '—'}
-            </Emphasis>
+            <AmountCell>
+              <Emphasis>
+                {entry.billable ? formatCurrency(amount) : '—'}
+              </Emphasis>
+              {entry.billable && (
+                <EntryOverageIndicator
+                  segments={segments}
+                  totalSeconds={entry.duration_seconds}
+                  align="right"
+                />
+              )}
+            </AmountCell>
           )
         },
       },
@@ -196,7 +230,7 @@ const ReportsPage = () => {
 
   const exportCsv = () => {
     const rows: string[][] = [
-      ['Client', 'Project', 'Description', 'Date', 'Duration (hrs)', 'Billable', 'Rate', 'Amount'],
+      ['Client', 'Project', 'Description', 'Date', 'Duration (hrs)', 'Billable', 'Overage', 'Rate', 'Amount'],
     ]
 
     for (const entry of entries) {
@@ -215,6 +249,7 @@ const ReportsPage = () => {
         formatDate(entry.started_at),
         formatHours(entry.duration_seconds),
         entry.billable ? 'Yes' : 'No',
+        entry.billable && entryHasOverage(segments) ? 'Yes' : 'No',
         rateLabel,
         entry.billable ? amount.toFixed(2) : '0',
       ])
@@ -270,6 +305,76 @@ const ReportsPage = () => {
           </Grid>
         </FilterCard>
 
+        {retainerSummaries.length > 0 && (
+          <RetainerStack>
+            {retainerSummaries.map((summary) => {
+              const retainerPct = Math.min(
+                100,
+                (summary.retainerHoursUsed / summary.allowanceHours) * 100,
+              )
+              const overagePct = Math.min(
+                100,
+                (summary.overageHoursUsed / summary.allowanceHours) * 100,
+              )
+
+              return (
+                <RetainerCard key={summary.clientId}>
+                  <RetainerCardHeader>
+                    <div>
+                      <RetainerTitle>
+                        Monthly retainer
+                        {retainerSummaries.length > 1 && (
+                          <> — {summary.clientName}</>
+                        )}
+                      </RetainerTitle>
+                      <Text $size="xs" $color="muted">
+                        {formatHours(summary.allowanceHours * 3600)}/mo @{' '}
+                        {formatCurrency(summary.retainerRate)}/hr ·{' '}
+                        {formatCurrency(summary.overageRate)}/hr overage
+                      </Text>
+                    </div>
+                  </RetainerCardHeader>
+                  <RetainerCardBody>
+                    <UsageBar>
+                      <UsageBarFill
+                        $variant="retainer"
+                        $width={retainerPct}
+                      />
+                      {summary.overageHoursUsed > 0 && (
+                        <UsageBarFill $variant="overage" $width={overagePct} />
+                      )}
+                    </UsageBar>
+                    <RetainerStats>
+                      <RetainerStat>
+                        <StatLabel>Retainer used</StatLabel>
+                        <CompactStatValue>
+                          {formatHours(summary.retainerHoursUsed * 3600)}
+                        </CompactStatValue>
+                      </RetainerStat>
+                      <RetainerStat>
+                        <StatLabel>Remaining</StatLabel>
+                        <CompactStatValue>
+                          {formatHours(summary.retainerHoursRemaining * 3600)}
+                        </CompactStatValue>
+                      </RetainerStat>
+                      <RetainerStat>
+                        <StatLabel>Overage</StatLabel>
+                        <CompactStatValue>
+                          {formatHours(summary.overageHoursUsed * 3600)}
+                        </CompactStatValue>
+                      </RetainerStat>
+                    </RetainerStats>
+                    <MutedHint>
+                      Based on billable entries in this date range, allocated
+                      chronologically. Overage badges match this allocation.
+                    </MutedHint>
+                  </RetainerCardBody>
+                </RetainerCard>
+              )
+            })}
+          </RetainerStack>
+        )}
+
         <Grid $cols={3}>
           <StatCard>
             <StatLabel>Total hours</StatLabel>
@@ -313,6 +418,64 @@ const FilterCard = styled(Card)`
   padding: 1.25rem;
 `
 
+const RetainerStack = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+`
+
+const RetainerCard = styled(Card)`
+  overflow: hidden;
+`
+
+const RetainerCardHeader = styled.div`
+  padding: 1rem 1.25rem;
+  border-bottom: 1px solid ${({ theme }) => theme.colors.border};
+`
+
+const RetainerTitle = styled.h3`
+  margin: 0 0 0.25rem;
+  font-size: ${({ theme }) => theme.fontSizes.base};
+  font-weight: ${({ theme }) => theme.fontWeights.medium};
+  color: ${({ theme }) => theme.colors.secondary};
+`
+
+const RetainerCardBody = styled.div`
+  padding: 1rem 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+`
+
+const UsageBar = styled.div`
+  display: flex;
+  height: 0.5rem;
+  border-radius: ${({ theme }) => theme.radii.full};
+  background: ${({ theme }) => theme.colors.background};
+  overflow: hidden;
+`
+
+const UsageBarFill = styled.div<{
+  $variant: 'retainer' | 'overage'
+  $width: number
+}>`
+  width: ${({ $width }) => $width}%;
+  background: ${({ $variant, theme }) =>
+    $variant === 'retainer' ? theme.colors.primary : theme.colors.accent};
+`
+
+const RetainerStats = styled.div`
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+`
+
+const RetainerStat = styled.div``
+
+const CompactStatValue = styled(StatValue)`
+  font-size: ${({ theme }) => theme.fontSizes.xl};
+`
+
 const ExportRow = styled.div`
   display: flex;
   justify-content: flex-end;
@@ -321,6 +484,13 @@ const ExportRow = styled.div`
 const Emphasis = styled.span`
   color: ${({ theme }) => theme.colors.secondary};
   font-weight: ${({ theme }) => theme.fontWeights.medium};
+`
+
+const AmountCell = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.25rem;
 `
 
 export default ReportsPage

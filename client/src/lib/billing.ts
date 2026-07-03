@@ -1,4 +1,5 @@
 import type {
+  BillingTier,
   Client,
   DraftLineItem,
   TimeEntryWithProject,
@@ -21,7 +22,7 @@ export interface BilledSegment {
   hours: number
   rate: number
   amount: number
-  tier: 'standard' | 'retainer' | 'overage'
+  tier: BillingTier
 }
 
 function roundMoney(value: number): number {
@@ -149,6 +150,7 @@ export function segmentsToLineItems(segments: BilledSegment[]): DraftLineItem[] 
         rate: segment.rate,
         amount: segment.amount,
         time_entry_ids: [segment.entry_id],
+        tier: segment.tier,
       })
     }
   }
@@ -176,6 +178,104 @@ export function entryBillableAmount(
       .filter((segment) => segment.entry_id === entry.id)
       .reduce((sum, segment) => sum + segment.amount, 0),
   )
+}
+
+export function entryHasOverage(segments: BilledSegment[]): boolean {
+  return segments.some((segment) => segment.tier === 'overage')
+}
+
+export function entryOverageSeconds(segments: BilledSegment[]): number {
+  const hours = segments
+    .filter((segment) => segment.tier === 'overage')
+    .reduce((sum, segment) => sum + segment.hours, 0)
+
+  return Math.round(hours * 3600)
+}
+
+export function isOverageLineItem(item: {
+  tier?: BillingTier
+  description: string
+}): boolean {
+  return item.tier === 'overage' || item.description.endsWith('— overage')
+}
+
+export interface RetainerUsageSummary {
+  clientId: string
+  clientName: string
+  allowanceHours: number
+  retainerHoursUsed: number
+  overageHoursUsed: number
+  retainerHoursRemaining: number
+  retainerRate: number
+  overageRate: number
+}
+
+export function emptyRetainerSummary(
+  client: ClientBillingInfo & Pick<Client, 'id' | 'name'>,
+): RetainerUsageSummary | null {
+  if (!hasRetainerBilling(client)) return null
+
+  const allowanceHours = client.retainer_hours_per_month!
+
+  return {
+    clientId: client.id,
+    clientName: client.name,
+    allowanceHours,
+    retainerHoursUsed: 0,
+    overageHoursUsed: 0,
+    retainerHoursRemaining: allowanceHours,
+    retainerRate: client.retainer_hourly_rate!,
+    overageRate: client.retainer_overage_rate!,
+  }
+}
+
+export function summarizeRetainerUsage(
+  entries: TimeEntryWithProject[],
+): RetainerUsageSummary[] {
+  const byClient = new Map<string, TimeEntryWithProject[]>()
+
+  for (const entry of entries) {
+    if (!entry.billable) continue
+    const clientId = entry.projects.client_id
+    const group = byClient.get(clientId) ?? []
+    group.push(entry)
+    byClient.set(clientId, group)
+  }
+
+  const summaries: RetainerUsageSummary[] = []
+
+  for (const clientEntries of byClient.values()) {
+    const client = clientEntries[0].projects.clients
+    if (!hasRetainerBilling(client)) continue
+
+    const allowanceHours = client.retainer_hours_per_month!
+    const segments = billTimeEntries(clientEntries, client)
+
+    let retainerHoursUsed = 0
+    let overageHoursUsed = 0
+    for (const segment of segments) {
+      if (segment.tier === 'retainer') retainerHoursUsed += segment.hours
+      if (segment.tier === 'overage') overageHoursUsed += segment.hours
+    }
+
+    retainerHoursUsed = roundHours(retainerHoursUsed)
+    overageHoursUsed = roundHours(overageHoursUsed)
+
+    summaries.push({
+      clientId: client.id,
+      clientName: client.name,
+      allowanceHours,
+      retainerHoursUsed,
+      overageHoursUsed,
+      retainerHoursRemaining: roundHours(
+        Math.max(0, allowanceHours - retainerHoursUsed),
+      ),
+      retainerRate: client.retainer_hourly_rate!,
+      overageRate: client.retainer_overage_rate!,
+    })
+  }
+
+  return summaries.sort((a, b) => a.clientName.localeCompare(b.clientName))
 }
 
 export function totalRevenueFromEntries(

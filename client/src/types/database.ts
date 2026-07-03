@@ -93,6 +93,8 @@ export interface InvoiceWithDetails extends Invoice {
   })[]
 }
 
+export type BillingTier = 'standard' | 'retainer' | 'overage'
+
 export interface DraftLineItem {
   project_id: string
   project_name: string
@@ -101,4 +103,5 @@ export interface DraftLineItem {
   rate: number
   amount: number
   time_entry_ids: string[]
+  tier: BillingTier
 }

@@ -1,6 +1,6 @@
 import styled, { css } from 'styled-components'
 
-export type BadgeVariant = 'draft' | 'sent' | 'paid' | 'default'
+export type BadgeVariant = 'draft' | 'sent' | 'paid' | 'overage' | 'default'
 
 const badgeVariants = {
   draft: css`
@@ -14,6 +14,10 @@ const badgeVariants = {
   paid: css`
     background: color-mix(in srgb, ${({ theme }) => theme.colors.success} 12%, ${({ theme }) => theme.colors.tertiary});
     color: ${({ theme }) => theme.colors.success};
+  `,
+  overage: css`
+    background: color-mix(in srgb, ${({ theme }) => theme.colors.accent} 18%, ${({ theme }) => theme.colors.tertiary});
+    color: ${({ theme }) => theme.colors.accent};
   `,
   default: css`
     background: ${({ theme }) => theme.colors.background};
@@ -83,3 +87,9 @@ export const MutedHint = styled.span`
   font-size: ${({ theme }) => theme.fontSizes.xs};
   color: ${({ theme }) => theme.colors.muted};
 `
+
+export const OverageBadge = () => (
+  <Badge $variant="overage" $size="sm">
+    Overage
+  </Badge>
+)

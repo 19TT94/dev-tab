@@ -58,6 +58,7 @@ describe('useInvoiceMutations', () => {
           rate: 100,
           amount: 200,
           time_entry_ids: [],
+          tier: 'standard',
         },
       ],
     })
