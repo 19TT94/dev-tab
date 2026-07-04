@@ -13,6 +13,7 @@ import type { InvoiceWithDetails } from '../types/database'
 
 // Components
 import { ModalAddInvoice } from '../components/ModalAddInvoice'
+import { ModalInvoicePreview } from '../components/ModalInvoicePreview'
 import { Button } from '../components/Button'
 import { downloadInvoicePdf } from '../components/InvoicePdf'
 import {
@@ -83,13 +84,16 @@ const LINE_ITEM_COLUMNS: TableColumn<InvoiceLineItemRow>[] = [
 const InvoiceDetail = ({ invoiceId, onBack }: { invoiceId: string; onBack: () => void }) => {
   const { data: invoice, isLoading } = useInvoice(invoiceId)
   const { updateStatus, remove } = useInvoiceMutations()
+  const [previewOpen, setPreviewOpen] = useState(false)
 
   if (isLoading || !invoice) {
     return <Text $color="muted">Loading invoice...</Text>
   }
 
+  const invoiceDetails = invoice as InvoiceWithDetails
+
   const handleDownload = async () => {
-    await downloadInvoicePdf(invoice as InvoiceWithDetails)
+    await downloadInvoicePdf(invoiceDetails)
   }
 
   const handleStatusChange = async (status: 'draft' | 'sent' | 'paid') => {
@@ -142,6 +146,9 @@ const InvoiceDetail = ({ invoiceId, onBack }: { invoiceId: string; onBack: () =>
           )}
 
           <ButtonRow style={{ flexWrap: 'wrap' }}>
+            <Button variant="secondary" onClick={() => setPreviewOpen(true)}>
+              Preview PDF
+            </Button>
             <Button onClick={handleDownload}>Download PDF</Button>
             {invoice.status === 'draft' && (
               <Button variant="secondary" onClick={() => handleStatusChange('sent')}>
@@ -164,6 +171,12 @@ const InvoiceDetail = ({ invoiceId, onBack }: { invoiceId: string; onBack: () =>
           </ButtonRow>
         </CardBody>
       </Card>
+
+      <ModalInvoicePreview
+        open={previewOpen}
+        invoice={invoiceDetails}
+        onClose={() => setPreviewOpen(false)}
+      />
     </PageStack>
   )
 }

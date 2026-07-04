@@ -33,6 +33,7 @@ export function useClientMutations() {
     mutationFn: async (input: {
       name: string
       email?: string
+      address?: string
       default_hourly_rate: number
       retainer_enabled?: boolean
       retainer_hours_per_month?: number | null
@@ -56,6 +57,7 @@ export function useClientMutations() {
       id: string
       name: string
       email?: string
+      address?: string
       default_hourly_rate: number
       retainer_enabled?: boolean
       retainer_hours_per_month?: number | null

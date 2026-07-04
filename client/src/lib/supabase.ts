@@ -16,5 +16,9 @@ export const supabase = createClient(
 
 export const businessInfo = {
   name: import.meta.env.VITE_BUSINESS_NAME ?? 'Your Business',
+  email: import.meta.env.VITE_BUSINESS_EMAIL ?? '',
+  phone: import.meta.env.VITE_BUSINESS_PHONE ?? '',
+  website: import.meta.env.VITE_BUSINESS_WEBSITE ?? '',
   address: import.meta.env.VITE_BUSINESS_ADDRESS ?? '',
+  logo: import.meta.env.VITE_BUSINESS_LOGO ?? '',
 }

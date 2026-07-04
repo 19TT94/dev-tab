@@ -62,6 +62,7 @@ function createSeedData(): MockData {
       user_id: MOCK_USER_ID,
       name: 'Company 1',
       email: 'billing@company1.example',
+      address: '650 Leanna Dr, Arroyo Grande, CA 93420',
       default_hourly_rate: 150,
       retainer_enabled: true,
       retainer_hours_per_month: 15,
@@ -74,6 +75,7 @@ function createSeedData(): MockData {
       user_id: MOCK_USER_ID,
       name: 'Company 2',
       email: null,
+      address: null,
       default_hourly_rate: 125,
       retainer_enabled: false,
       retainer_hours_per_month: null,
@@ -259,6 +261,7 @@ function normalizeClient(
   return {
     ...client,
     email: client.email ?? null,
+    address: client.address ?? null,
     retainer_enabled: client.retainer_enabled ?? false,
     retainer_hours_per_month: client.retainer_hours_per_month ?? null,
     retainer_hourly_rate: client.retainer_hourly_rate ?? null,
@@ -323,6 +326,7 @@ export const mockStore = {
   createClient(input: {
     name: string
     email?: string
+    address?: string
     default_hourly_rate: number
     retainer_enabled?: boolean
     retainer_hours_per_month?: number | null
@@ -335,6 +339,7 @@ export const mockStore = {
       user_id: MOCK_USER_ID,
       name: input.name,
       email: input.email ?? null,
+      address: input.address ?? null,
       default_hourly_rate: input.default_hourly_rate,
       retainer_enabled: input.retainer_enabled ?? false,
       retainer_hours_per_month: input.retainer_hours_per_month ?? null,
@@ -351,6 +356,7 @@ export const mockStore = {
     id: string
     name: string
     email?: string
+    address?: string
     default_hourly_rate: number
     retainer_enabled?: boolean
     retainer_hours_per_month?: number | null
@@ -364,6 +370,7 @@ export const mockStore = {
       ...data.clients[idx],
       name: input.name,
       email: input.email ?? null,
+      address: input.address ?? null,
       default_hourly_rate: input.default_hourly_rate,
       retainer_enabled: input.retainer_enabled ?? false,
       retainer_hours_per_month: input.retainer_hours_per_month ?? null,
