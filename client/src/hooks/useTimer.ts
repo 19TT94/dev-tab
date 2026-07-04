@@ -72,6 +72,27 @@ export function useTimer() {
       queryClient.invalidateQueries({ queryKey: ['active_timer'] }),
   })
 
+  const updateDescription = useMutation({
+    mutationFn: async (input: { description?: string }) => {
+      if (!activeTimer) throw new Error('No active timer')
+
+      if (isMockMode) {
+        return mockStore.updateActiveTimerDescription(input.description)
+      }
+
+      const { data, error } = await supabase
+        .from('active_timers')
+        .update({ description: input.description ?? null })
+        .eq('user_id', user!.id)
+        .select()
+        .single()
+      if (error) throw error
+      return data as ActiveTimer
+    },
+    onSuccess: () =>
+      queryClient.invalidateQueries({ queryKey: ['active_timer'] }),
+  })
+
   const stop = useMutation({
     mutationFn: async () => {
       if (!activeTimer) throw new Error('No active timer')
@@ -118,5 +139,5 @@ export function useTimer() {
     },
   })
 
-  return { activeTimer, elapsed, isLoading, start, stop }
+  return { activeTimer, elapsed, isLoading, start, stop, updateDescription }
 }

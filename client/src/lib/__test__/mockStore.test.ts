@@ -147,6 +147,7 @@ describe('mockStore', () => {
           rate: 100,
           amount: 100,
           time_entry_ids: [entry.id],
+          tier: 'standard',
         },
       ],
     })
@@ -183,6 +184,7 @@ describe('mockStore', () => {
           rate: 100,
           amount: 100,
           time_entry_ids: [],
+          tier: 'standard',
         },
       ],
     })

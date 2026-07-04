@@ -40,6 +40,7 @@ export {
   MutedHint,
 } from './Badge'
 export type { BadgeVariant } from './Badge'
+export { OverageBadge } from './OverageBadge'
 export {
   TableWrapper,
   Table,

@@ -3,9 +3,14 @@ import {
   billEntriesForReport,
   billTimeEntries,
   entryBillableAmount,
+  entryHasOverage,
+  entryOverageSeconds,
+  emptyRetainerSummary,
   groupEntriesIntoLineItems,
   hasRetainerBilling,
+  isOverageLineItem,
   segmentsToLineItems,
+  summarizeRetainerUsage,
   totalRevenueFromEntries,
 } from '../billing'
 import { makeRetainerClient, makeTimeEntry } from '../../test/fixtures'
@@ -111,7 +116,17 @@ describe('groupEntriesIntoLineItems', () => {
       hours: 1,
       rate: 100,
       amount: 100,
+      tier: 'standard',
     })
+  })
+
+  it('tags overage line items', () => {
+    const client = makeRetainerClient({ retainer_hours_per_month: 0.01 })
+    const entry = makeTimeEntry({ duration_seconds: 3600 })
+    const items = groupEntriesIntoLineItems([entry], client)
+    const overageItem = items.find((item) => item.tier === 'overage')
+    expect(overageItem).toBeDefined()
+    expect(overageItem!.description).toBe('Test Project — overage')
   })
 })
 
@@ -121,6 +136,95 @@ describe('entryBillableAmount', () => {
     const entry = makeTimeEntry({ duration_seconds: 7200 })
     const segments = billTimeEntries([entry], client)
     expect(entryBillableAmount(entry, segments)).toBe(275)
+  })
+})
+
+describe('entryHasOverage', () => {
+  it('returns true when an entry has overage segments', () => {
+    const client = makeRetainerClient({ retainer_hours_per_month: 0.01 })
+    const entry = makeTimeEntry()
+    const segments = billTimeEntries([entry], client)
+    expect(entryHasOverage(segments)).toBe(true)
+  })
+
+  it('returns false for standard billing', () => {
+    const segments = billTimeEntries([makeTimeEntry()])
+    expect(entryHasOverage(segments)).toBe(false)
+  })
+})
+
+describe('entryOverageSeconds', () => {
+  it('returns overage duration in seconds', () => {
+    const client = makeRetainerClient({ retainer_hours_per_month: 0.5 })
+    const entry = makeTimeEntry({ duration_seconds: 7200 })
+    const segments = billTimeEntries([entry], client)
+    expect(entryOverageSeconds(segments)).toBe(5400)
+  })
+})
+
+describe('isOverageLineItem', () => {
+  it('detects overage by tier', () => {
+    expect(isOverageLineItem({ description: 'Project', tier: 'overage' })).toBe(
+      true,
+    )
+  })
+
+  it('detects overage by description suffix', () => {
+    expect(
+      isOverageLineItem({ description: 'Website Redesign — overage' }),
+    ).toBe(true)
+  })
+})
+
+describe('summarizeRetainerUsage', () => {
+  it('summarizes retainer and overage hours for a client', () => {
+    const client = makeRetainerClient({ retainer_hours_per_month: 5 })
+    const entry1 = makeTimeEntry({
+      id: 'entry-1',
+      started_at: '2024-01-01T09:00:00.000Z',
+      duration_seconds: 4 * 3600,
+      projects: {
+        ...makeTimeEntry().projects,
+        clients: {
+          ...makeTimeEntry().projects.clients,
+          ...client,
+          id: 'client-1',
+          name: 'Retainer Co',
+        },
+      },
+    })
+    const entry2 = makeTimeEntry({
+      id: 'entry-2',
+      started_at: '2024-01-02T09:00:00.000Z',
+      duration_seconds: 3 * 3600,
+      projects: entry1.projects,
+    })
+
+    const summaries = summarizeRetainerUsage([entry1, entry2])
+    expect(summaries).toHaveLength(1)
+    expect(summaries[0]).toMatchObject({
+      clientName: 'Retainer Co',
+      allowanceHours: 5,
+      retainerHoursUsed: 5,
+      overageHoursUsed: 2,
+      retainerHoursRemaining: 0,
+    })
+  })
+
+  it('returns an empty summary for retainer clients with no billable hours', () => {
+    const client = makeRetainerClient()
+    const summary = emptyRetainerSummary({
+      id: 'client-1',
+      name: 'Retainer Co',
+      ...client,
+    })
+
+    expect(summary).toMatchObject({
+      allowanceHours: 10,
+      retainerHoursUsed: 0,
+      overageHoursUsed: 0,
+      retainerHoursRemaining: 10,
+    })
   })
 })
 
