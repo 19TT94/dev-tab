@@ -7,6 +7,7 @@ export function makeClient(overrides: Partial<Client> = {}): Client {
     user_id: 'mock-user-id',
     name: 'Test Client',
     email: null,
+    address: null,
     default_hourly_rate: 100,
     retainer_enabled: false,
     retainer_hours_per_month: null,

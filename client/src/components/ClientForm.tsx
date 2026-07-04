@@ -11,6 +11,7 @@ import { ButtonRow, Checkbox, CheckboxLabel, FormStack, Panel, Text } from './ui
 export interface ClientFormData {
   name: string
   email: string
+  address: string
   default_hourly_rate: number
   retainer_enabled: boolean
   retainer_hours_per_month: number | null
@@ -30,6 +31,7 @@ export const ClientForm = ({ client, onSave, onCancel }: ClientFormProps) => {
       ? {
           name: client.name,
           email: client.email ?? '',
+          address: client.address ?? '',
           default_hourly_rate: client.default_hourly_rate,
           retainer_enabled: client.retainer_enabled,
           retainer_hours_per_month: client.retainer_hours_per_month,
@@ -39,6 +41,7 @@ export const ClientForm = ({ client, onSave, onCancel }: ClientFormProps) => {
       : {
           name: '',
           email: '',
+          address: '',
           default_hourly_rate: 0,
           retainer_enabled: false,
           retainer_hours_per_month: null,
@@ -53,6 +56,7 @@ export const ClientForm = ({ client, onSave, onCancel }: ClientFormProps) => {
     <FormStack onSubmit={handleSubmit(onSave)}>
       <Input label="Name" {...register('name', { required: true })} />
       <Input label="Email" type="email" {...register('email')} />
+      <Input label="Billing address" {...register('address')} />
       <Input
         label="Default hourly rate ($)"
         type="number"
