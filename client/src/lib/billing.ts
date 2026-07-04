@@ -176,10 +176,15 @@ export function segmentsToLineItems(segments: BilledSegment[]): DraftLineItem[] 
     }
   }
 
-  return Array.from(groups.values()).map(({ descriptions: _, ...item }) => ({
-    ...item,
+  return Array.from(groups.values()).map((item) => ({
+    project_id: item.project_id,
+    project_name: item.project_name,
+    description: item.description,
     hours: roundHours(item.hours),
+    rate: item.rate,
     amount: roundMoney(item.amount),
+    time_entry_ids: item.time_entry_ids,
+    tier: item.tier,
   }))
 }
 
