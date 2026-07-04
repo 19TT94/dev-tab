@@ -10,8 +10,8 @@ describe('ClientsPage', () => {
     expect(screen.getByRole('heading', { name: 'Clients & Projects' })).toBeInTheDocument()
 
     await waitFor(() => {
-      expect(screen.getByText('Acme Corp')).toBeInTheDocument()
-      expect(screen.getByText('Startup Labs')).toBeInTheDocument()
+      expect(screen.getByText('Company 1')).toBeInTheDocument()
+      expect(screen.getByText('Company 2')).toBeInTheDocument()
     })
   })
 })

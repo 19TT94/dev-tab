@@ -31,6 +31,23 @@ function id() {
   return crypto.randomUUID()
 }
 
+function entryAtDaysAgo(
+  daysAgo: number,
+  startHour: number,
+  durationHours: number,
+): Pick<TimeEntry, 'started_at' | 'ended_at' | 'duration_seconds'> {
+  const start = new Date()
+  start.setHours(startHour, 0, 0, 0)
+  start.setDate(start.getDate() - daysAgo)
+  const end = new Date(start.getTime() + durationHours * 3600 * 1000)
+
+  return {
+    started_at: start.toISOString(),
+    ended_at: end.toISOString(),
+    duration_seconds: durationHours * 3600,
+  }
+}
+
 function createSeedData(): MockData {
   const client1Id = 'seed-client-1'
   const client2Id = 'seed-client-2'
@@ -43,8 +60,8 @@ function createSeedData(): MockData {
     {
       id: client1Id,
       user_id: MOCK_USER_ID,
-      name: 'Acme Corp',
-      email: 'billing@acme.example',
+      name: 'Company 1',
+      email: 'billing@company1.example',
       default_hourly_rate: 150,
       retainer_enabled: true,
       retainer_hours_per_month: 15,
@@ -55,7 +72,7 @@ function createSeedData(): MockData {
     {
       id: client2Id,
       user_id: MOCK_USER_ID,
-      name: 'Startup Labs',
+      name: 'Company 2',
       email: null,
       default_hourly_rate: 125,
       retainer_enabled: false,
@@ -99,25 +116,129 @@ function createSeedData(): MockData {
     },
   ]
 
-  const yesterday = new Date()
-  yesterday.setDate(yesterday.getDate() - 1)
-  yesterday.setHours(9, 0, 0, 0)
-  const yesterdayEnd = new Date(yesterday)
-  yesterdayEnd.setHours(11, 30, 0, 0)
-
+  // Company 1 retainer (15 hr/mo): retainer-only → partial overage → full overage → non-billable
+  // Company 2: standard hourly billing
   const timeEntries: TimeEntry[] = [
     {
       id: 'seed-entry-1',
       user_id: MOCK_USER_ID,
       project_id: project1Id,
-      description: 'Homepage wireframes',
-      started_at: yesterday.toISOString(),
-      ended_at: yesterdayEnd.toISOString(),
-      duration_seconds: 9000,
+      description: 'Retainer — discovery & wireframes',
       billable: true,
       invoice_id: null,
       created_at: createdAt,
       updated_at: createdAt,
+      ...entryAtDaysAgo(14, 9, 4),
+    },
+    {
+      id: 'seed-entry-2',
+      user_id: MOCK_USER_ID,
+      project_id: project1Id,
+      description: 'Retainer — visual design',
+      billable: true,
+      invoice_id: null,
+      created_at: createdAt,
+      updated_at: createdAt,
+      ...entryAtDaysAgo(12, 9, 4),
+    },
+    {
+      id: 'seed-entry-3',
+      user_id: MOCK_USER_ID,
+      project_id: project1Id,
+      description: 'Retainer — homepage build',
+      billable: true,
+      invoice_id: null,
+      created_at: createdAt,
+      updated_at: createdAt,
+      ...entryAtDaysAgo(10, 9, 4),
+    },
+    {
+      id: 'seed-entry-4',
+      user_id: MOCK_USER_ID,
+      project_id: project1Id,
+      description: 'Partial overage — 3 hr retainer + 2 hr overage',
+      billable: true,
+      invoice_id: null,
+      created_at: createdAt,
+      updated_at: createdAt,
+      ...entryAtDaysAgo(8, 9, 5),
+    },
+    {
+      id: 'seed-entry-5',
+      user_id: MOCK_USER_ID,
+      project_id: project1Id,
+      description: 'Full overage — retainer exhausted',
+      billable: true,
+      invoice_id: null,
+      created_at: createdAt,
+      updated_at: createdAt,
+      ...entryAtDaysAgo(6, 9, 2),
+    },
+    {
+      id: 'seed-entry-6',
+      user_id: MOCK_USER_ID,
+      project_id: project2Id,
+      description: 'Full overage — internal tools (project rate $100)',
+      billable: true,
+      invoice_id: null,
+      created_at: createdAt,
+      updated_at: createdAt,
+      ...entryAtDaysAgo(4, 10, 2.5),
+    },
+    {
+      id: 'seed-entry-7',
+      user_id: MOCK_USER_ID,
+      project_id: project1Id,
+      description: 'Non-billable — internal planning',
+      billable: false,
+      invoice_id: null,
+      created_at: createdAt,
+      updated_at: createdAt,
+      ...entryAtDaysAgo(2, 14, 3),
+    },
+    {
+      id: 'seed-entry-8',
+      user_id: MOCK_USER_ID,
+      project_id: project1Id,
+      description: 'Today — full overage (retainer already used)',
+      billable: true,
+      invoice_id: null,
+      created_at: createdAt,
+      updated_at: createdAt,
+      ...entryAtDaysAgo(0, 9, 2),
+    },
+    {
+      id: 'seed-entry-9',
+      user_id: MOCK_USER_ID,
+      project_id: project3Id,
+      description: 'Standard billing — MVP sprint',
+      billable: true,
+      invoice_id: null,
+      created_at: createdAt,
+      updated_at: createdAt,
+      ...entryAtDaysAgo(13, 9, 3),
+    },
+    {
+      id: 'seed-entry-10',
+      user_id: MOCK_USER_ID,
+      project_id: project3Id,
+      description: 'Non-billable — stakeholder sync',
+      billable: false,
+      invoice_id: null,
+      created_at: createdAt,
+      updated_at: createdAt,
+      ...entryAtDaysAgo(11, 11, 1.5),
+    },
+    {
+      id: 'seed-entry-11',
+      user_id: MOCK_USER_ID,
+      project_id: project3Id,
+      description: 'Standard billing — API integration',
+      billable: true,
+      invoice_id: null,
+      created_at: createdAt,
+      updated_at: createdAt,
+      ...entryAtDaysAgo(7, 9, 2),
     },
   ]
 
@@ -427,6 +548,17 @@ export const mockStore = {
     data.activeTimer = timer
     save(data)
     return timer
+  },
+
+  updateActiveTimerDescription(description?: string): ActiveTimer {
+    const data = load()
+    if (!data.activeTimer) throw new Error('No active timer')
+    data.activeTimer = {
+      ...data.activeTimer,
+      description: description ?? null,
+    }
+    save(data)
+    return data.activeTimer
   },
 
   deleteActiveTimer(): void {

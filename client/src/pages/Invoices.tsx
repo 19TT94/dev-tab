@@ -24,6 +24,7 @@ import {
   LinkButton,
   List,
   ListButton,
+  OverageBadge,
   PageContainer,
   PageHeader,
   PageStack,
@@ -39,6 +40,7 @@ import {
   formatCurrency,
   formatDate,
 } from '../lib/utils'
+import { isOverageLineItem } from '../lib/billing'
 
 type InvoiceLineItemRow = InvoiceWithDetails['invoice_line_items'][number]
 
@@ -46,7 +48,17 @@ const LINE_ITEM_COLUMNS: TableColumn<InvoiceLineItemRow>[] = [
   {
     key: 'description',
     header: 'Description',
-    render: (item) => item.description,
+    render: (item) => (
+      <>
+        {item.description}
+        {isOverageLineItem(item) && (
+          <>
+            <br />
+            <OverageBadge />
+          </>
+        )}
+      </>
+    ),
   },
   {
     key: 'hours',

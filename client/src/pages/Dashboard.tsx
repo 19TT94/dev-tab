@@ -1,9 +1,11 @@
+import { useMemo } from 'react'
 import styled from 'styled-components'
 
 // Hooks
 import { useTimeEntries } from '../hooks/useTimeEntries'
 
 // Components
+import { EntryOverageIndicator } from '../components/EntryOverageIndicator'
 import { Timer } from '../components/Timer'
 import {
   Card,
@@ -21,6 +23,7 @@ import {
 } from '../components/ui'
 
 // Utils
+import { billEntriesForReport } from '../lib/billing'
 import {
   formatDateTime,
   formatDuration,
@@ -30,10 +33,26 @@ import {
 
 const Dashboard = () => {
   const today = toDateInputValue(new Date())
+  const monthStart = useMemo(() => {
+    const d = new Date()
+    d.setDate(1)
+    return toDateInputValue(d)
+  }, [])
+
   const { data: entries = [], isLoading } = useTimeEntries({
     startDate: today,
     endDate: today,
   })
+
+  const { data: monthEntries = [] } = useTimeEntries({
+    startDate: monthStart,
+    endDate: today,
+  })
+
+  const segmentsByEntryId = useMemo(
+    () => billEntriesForReport(monthEntries),
+    [monthEntries],
+  )
 
   const totalSeconds = entries.reduce((sum, e) => sum + e.duration_seconds, 0)
 
@@ -45,15 +64,16 @@ const Dashboard = () => {
           <PageSubtitle>Track time and review today&apos;s work</PageSubtitle>
         </div>
 
+        {/* TODO: add autobillable - i.e. if time entry is > 8 hours, set billable to true */}
         <Timer />
 
         <Card>
-          {/* TODO: Add Weely & Monthly Preview */}
           <CardHeader $bordered>
             <CardTitle>Today&apos;s entries</CardTitle>
             <Text $color="muted">{formatHours(totalSeconds)} hrs total</Text>
           </CardHeader>
 
+          {/* TODO: Add Weekly & Monthly Summaries */}
           {isLoading ? (
             <Text $color="muted" style={{ padding: '1.25rem' }}>Loading...</Text>
           ) : entries.length === 0 ? (
@@ -80,6 +100,13 @@ const Dashboard = () => {
                       <MonoText>{formatDuration(entry.duration_seconds)}</MonoText>
                     </DurationValue>
                     {!entry.billable && <NonBillable>Non-billable</NonBillable>}
+                    {entry.billable && (
+                      <EntryOverageIndicator
+                        segments={segmentsByEntryId.get(entry.id) ?? []}
+                        totalSeconds={entry.duration_seconds}
+                        align="right"
+                      />
+                    )}
                   </EntryDuration>
                 </ListItem>
               ))}

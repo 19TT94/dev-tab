@@ -17,11 +17,12 @@ import {
   BaseTable,
   ButtonRow,
   Grid,
+  OverageBadge,
   type TableColumn,
 } from './ui'
 
 // Utils
-import { groupEntriesIntoLineItems } from '../lib/billing'
+import { groupEntriesIntoLineItems, isOverageLineItem } from '../lib/billing'
 import { formatCurrency, toDateInputValue } from '../lib/utils'
 
 interface InvoiceWizardProps {
@@ -104,12 +105,15 @@ export const InvoiceWizard = ({ onClose }: InvoiceWizardProps) => {
         render: (item) => {
           const index = lineItems.indexOf(item)
           return (
-            <InlineInput
-              value={item.description}
-              onChange={(event) =>
-                updateLineItem(index, 'description', event.target.value)
-              }
-            />
+            <DescriptionCell>
+              <InlineInput
+                value={item.description}
+                onChange={(event) =>
+                  updateLineItem(index, 'description', event.target.value)
+                }
+              />
+              {isOverageLineItem(item) && <OverageBadge />}
+            </DescriptionCell>
           )
         },
       },
@@ -247,6 +251,13 @@ export const InvoiceWizard = ({ onClose }: InvoiceWizardProps) => {
 // Style Overrides
 const LineItemsTable = styled.div`
   margin-bottom: 1rem;
+`
+
+const DescriptionCell = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.375rem;
 `
 
 const NumericInput = styled(InlineInput)`
