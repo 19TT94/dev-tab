@@ -35,14 +35,6 @@ export const Timer = () => {
     })),
   ]
 
-  const activeProject = projects.find((p) => p.id === activeTimer?.project_id)
-
-  useEffect(() => {
-    if (!activeTimer) {
-      setIsEditingDescription(false)
-    }
-  }, [activeTimer])
-
   useEffect(() => {
     if (isEditingDescription) {
       descriptionInputRef.current?.focus()
@@ -65,6 +57,7 @@ export const Timer = () => {
   const handleStop = async () => {
     try {
       await stop.mutateAsync()
+      setIsEditingDescription(false)
     } catch (err) {
       alert(err instanceof Error ? err.message : 'Failed to stop timer')
     }

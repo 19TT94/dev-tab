@@ -16,6 +16,7 @@ describe('useTimerDocumentTitle', () => {
       isLoading: false,
       start: {} as never,
       stop: {} as never,
+      updateDescription: {} as never,
     })
 
     renderHook(() => useTimerDocumentTitle())
@@ -36,6 +37,7 @@ describe('useTimerDocumentTitle', () => {
       isLoading: false,
       start: {} as never,
       stop: {} as never,
+      updateDescription: {} as never,
     })
 
     renderHook(() => useTimerDocumentTitle())
@@ -56,6 +58,7 @@ describe('useTimerDocumentTitle', () => {
       isLoading: false,
       start: {} as never,
       stop: {} as never,
+      updateDescription: {} as never,
     })
 
     const { unmount } = renderHook(() => useTimerDocumentTitle())

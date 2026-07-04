@@ -87,9 +87,3 @@ export const MutedHint = styled.span`
   font-size: ${({ theme }) => theme.fontSizes.xs};
   color: ${({ theme }) => theme.colors.muted};
 `
-
-export const OverageBadge = () => (
-  <Badge $variant="overage" $size="sm">
-    Overage
-  </Badge>
-)
