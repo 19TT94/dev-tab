@@ -5,6 +5,7 @@ export interface Client {
   user_id: string
   name: string
   email: string | null
+  address: string | null
   default_hourly_rate: number
   retainer_enabled: boolean
   retainer_hours_per_month: number | null

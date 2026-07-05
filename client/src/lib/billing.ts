@@ -19,6 +19,7 @@ export interface BilledSegment {
   entry_id: string
   project_id: string
   project_name: string
+  entry_description: string | null
   hours: number
   rate: number
   amount: number
@@ -65,6 +66,7 @@ export function billTimeEntries(
       entry_id: entry.id,
       project_id: entry.project_id,
       project_name: entry.projects.name,
+      entry_description: entry.description,
       hours,
       rate,
       amount: hours * rate,
@@ -99,6 +101,7 @@ function billWithRetainer(
         entry_id: entry.id,
         project_id: entry.project_id,
         project_name: entry.projects.name,
+        entry_description: entry.description,
         hours: retainerPortion,
         rate: retainerRate,
         amount: retainerPortion * retainerRate,
@@ -111,6 +114,7 @@ function billWithRetainer(
         entry_id: entry.id,
         project_id: entry.project_id,
         project_name: entry.projects.name,
+        entry_description: entry.description,
         hours: overagePortion,
         rate: overageRate,
         amount: overagePortion * overageRate,
@@ -122,18 +126,28 @@ function billWithRetainer(
   return segments
 }
 
+function formatLineItemDescription(descriptions: string[]): string {
+  if (descriptions.length === 0) return ''
+  return descriptions.map((description) => `● ${description}`).join('\n')
+}
+
+function addEntryDescription(
+  descriptions: string[],
+  entryDescription: string | null,
+): string[] {
+  const text = entryDescription?.trim()
+  if (!text || descriptions.includes(text)) return descriptions
+  return [...descriptions, text]
+}
+
 export function segmentsToLineItems(segments: BilledSegment[]): DraftLineItem[] {
-  const groups = new Map<string, DraftLineItem>()
+  const groups = new Map<
+    string,
+    DraftLineItem & { descriptions: string[] }
+  >()
 
   for (const segment of segments) {
     const key = `${segment.project_id}:${segment.rate}:${segment.tier}`
-    const description =
-      segment.tier === 'retainer'
-        ? `${segment.project_name} — retainer`
-        : segment.tier === 'overage'
-          ? `${segment.project_name} — overage`
-          : segment.project_name
-
     const existing = groups.get(key)
     if (existing) {
       existing.hours += segment.hours
@@ -141,24 +155,36 @@ export function segmentsToLineItems(segments: BilledSegment[]): DraftLineItem[] 
       if (!existing.time_entry_ids.includes(segment.entry_id)) {
         existing.time_entry_ids.push(segment.entry_id)
       }
+      existing.descriptions = addEntryDescription(
+        existing.descriptions,
+        segment.entry_description,
+      )
+      existing.description = formatLineItemDescription(existing.descriptions)
     } else {
+      const descriptions = addEntryDescription([], segment.entry_description)
       groups.set(key, {
         project_id: segment.project_id,
         project_name: segment.project_name,
-        description,
+        description: formatLineItemDescription(descriptions),
         hours: segment.hours,
         rate: segment.rate,
         amount: segment.amount,
         time_entry_ids: [segment.entry_id],
         tier: segment.tier,
+        descriptions,
       })
     }
   }
 
   return Array.from(groups.values()).map((item) => ({
-    ...item,
+    project_id: item.project_id,
+    project_name: item.project_name,
+    description: item.description,
     hours: roundHours(item.hours),
+    rate: item.rate,
     amount: roundMoney(item.amount),
+    time_entry_ids: item.time_entry_ids,
+    tier: item.tier,
   }))
 }
 

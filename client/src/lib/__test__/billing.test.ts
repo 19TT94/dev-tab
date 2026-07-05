@@ -122,11 +122,15 @@ describe('groupEntriesIntoLineItems', () => {
 
   it('tags overage line items', () => {
     const client = makeRetainerClient({ retainer_hours_per_month: 0.01 })
-    const entry = makeTimeEntry({ duration_seconds: 3600 })
+    const entry = makeTimeEntry({
+      duration_seconds: 3600,
+      description: 'Emergency fix',
+    })
     const items = groupEntriesIntoLineItems([entry], client)
     const overageItem = items.find((item) => item.tier === 'overage')
     expect(overageItem).toBeDefined()
-    expect(overageItem!.description).toBe('Test Project — overage')
+    expect(overageItem!.tier).toBe('overage')
+    expect(overageItem!.description).toBe('● Emergency fix')
   })
 })
 

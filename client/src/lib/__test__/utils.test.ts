@@ -7,6 +7,11 @@ import {
   formatDateTime,
   formatDuration,
   formatHours,
+  formatInvoiceHours,
+  formatInvoiceLabel,
+  formatInvoicePeriodDate,
+  formatInvoiceRate,
+  formatWebsiteHref,
   generateInvoiceNumber,
   resolveRate,
   startOfDay,
@@ -33,6 +38,44 @@ describe('formatCurrency', () => {
   it('formats USD amounts', () => {
     expect(formatCurrency(100)).toBe('$100.00')
     expect(formatCurrency(1234.5)).toBe('$1,234.50')
+  })
+})
+
+describe('formatInvoicePeriodDate', () => {
+  it('formats dates as MM/DD/YYYY', () => {
+    expect(formatInvoicePeriodDate('2026-05-01')).toBe('05/01/2026')
+    expect(formatInvoicePeriodDate('2026-05-31')).toBe('05/31/2026')
+  })
+})
+
+describe('formatInvoiceHours', () => {
+  it('formats decimal hours as H:MM', () => {
+    expect(formatInvoiceHours(15)).toBe('15:00')
+    expect(formatInvoiceHours(8.9)).toBe('8:54')
+  })
+})
+
+describe('formatInvoiceRate', () => {
+  it('omits cents for whole-dollar rates', () => {
+    expect(formatInvoiceRate(150)).toBe('$150')
+    expect(formatInvoiceRate(175)).toBe('$175')
+  })
+
+  it('keeps cents for fractional rates', () => {
+    expect(formatInvoiceRate(150.5)).toBe('$150.50')
+  })
+})
+
+describe('formatInvoiceLabel', () => {
+  it('formats invoice numbers with a hash prefix', () => {
+    expect(formatInvoiceLabel('INV-2026-262')).toBe('INVOICE #262')
+    expect(formatInvoiceLabel('INV-2026-001')).toBe('INVOICE #1')
+  })
+})
+
+describe('formatWebsiteHref', () => {
+  it('adds https when missing', () => {
+    expect(formatWebsiteHref('www.ttobin.com')).toBe('https://www.ttobin.com')
   })
 })
 

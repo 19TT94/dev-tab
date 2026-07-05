@@ -28,6 +28,62 @@ export function formatDate(date: string): string {
   })
 }
 
+export function formatInvoicePeriodDate(date: string): string {
+  const [year, month, day] = date.slice(0, 10).split('-')
+  return `${month}/${day}/${year}`
+}
+
+export function formatInvoiceHours(hours: number): string {
+  const totalMinutes = Math.round(hours * 60)
+  const h = Math.floor(totalMinutes / 60)
+  const m = totalMinutes % 60
+  return `${h}:${String(m).padStart(2, '0')}`
+}
+
+export function formatInvoiceRate(rate: number): string {
+  if (Number.isInteger(rate)) {
+    return new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: 'USD',
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0,
+    }).format(rate)
+  }
+  return formatCurrency(rate)
+}
+
+export function splitInvoiceDescription(description: string): string[] {
+  if (!description.trim()) return []
+  return description
+    .split('\n')
+    .map((line) => line.trim())
+    .filter(Boolean)
+}
+
+export function formatInvoiceLabel(invoiceNumber: string): string {
+  const suffix = invoiceNumber.split('-').pop() ?? invoiceNumber
+  const numeric = suffix.replace(/^0+/, '') || suffix
+  return `INVOICE #${numeric}`
+}
+
+export function formatWebsiteHref(website: string): string {
+  const trimmed = website.trim()
+  if (!trimmed) return ''
+  if (trimmed.startsWith('http://') || trimmed.startsWith('https://')) return trimmed
+  return `https://${trimmed}`
+}
+
+export function resolveAssetUrl(path: string): string {
+  if (!path) return ''
+  if (path.startsWith('data:') || path.startsWith('http://') || path.startsWith('https://')) {
+    return path
+  }
+  if (typeof window !== 'undefined') {
+    return new URL(path.startsWith('/') ? path : `/${path}`, window.location.origin).href
+  }
+  return path
+}
+
 export function formatDateTime(date: string): string {
   return new Date(date).toLocaleString('en-US', {
     month: 'short',
