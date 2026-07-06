@@ -28,7 +28,7 @@ import {
 // Styles
 import { theme } from '../styles/theme'
 
-import defaultInvoiceLogo from '../assets/invoice-logo.png'
+import defaultInvoiceLogo from '../assets/tail-bw.png'
 
 const brandAddressLines = (address: string): string[] => {
   const parts = address.split(',').map((part) => part.trim()).filter(Boolean)
@@ -105,7 +105,7 @@ const { colors } = theme
 
 const BORDER_RADIUS = 6
 const INNER_BORDER_RADIUS = BORDER_RADIUS - 1
-const TABLE_HEADER_BG = `color-mix(in srgb, ${colors.muted} 8%, ${colors.tertiary})`
+const TABLE_HEADER_BG = colors.secondary
 
 const COLUMN_STYLES = {
   service: { width: '22%', paddingRight: 8 },
@@ -239,7 +239,10 @@ const styles = StyleSheet.create({
     fontSize: 8.5,
     fontWeight: 'bold',
     letterSpacing: 0.6,
-    color: colors.secondary,
+    color: colors.tertiary,
+  },
+  tableHeaderNumeric: {
+    textAlign: 'right',
   },
   tableRow: {
     flexDirection: 'row',
@@ -416,7 +419,7 @@ const LineItemRow = ({
         {descriptionLines.length > 0 ? (
           descriptionLines.map((line, index) => (
             <Text key={`${item.id}-${index}`} style={styles.descriptionLine}>
-              {line.startsWith('●') ? line : `● ${line}`}
+              {line}
             </Text>
           ))
         ) : (
@@ -461,19 +464,19 @@ const HeaderCellDescription = ({ children }: { children: ReactNode }) => (
 )
 
 const HeaderCellHrs = ({ children }: { children: ReactNode }) => (
-  <Text style={[styles.tableHeaderText, styles.colNumeric, styles.colHrs]}>
+  <Text style={[styles.tableHeaderText, styles.tableHeaderNumeric, styles.colHrs]}>
     {children}
   </Text>
 )
 
 const HeaderCellRate = ({ children }: { children: ReactNode }) => (
-  <Text style={[styles.tableHeaderText, styles.colNumeric, styles.colRate]}>
+  <Text style={[styles.tableHeaderText, styles.tableHeaderNumeric, styles.colRate]}>
     {children}
   </Text>
 )
 
 const HeaderCellAmount = ({ children }: { children: ReactNode }) => (
-  <Text style={[styles.tableHeaderText, styles.colNumeric, styles.colAmount]}>
+  <Text style={[styles.tableHeaderText, styles.tableHeaderNumeric, styles.colAmount]}>
     {children}
   </Text>
 )

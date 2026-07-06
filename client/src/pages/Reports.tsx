@@ -13,6 +13,8 @@ import type { TimeEntryWithProject } from '../types/database'
 import { Button } from '../components/Button'
 import { EntryOverageIndicator } from '../components/EntryOverageIndicator'
 import { Input, Select } from '../components/FormFields'
+import { ModalReportPreview } from '../components/ModalReportPreview'
+import { downloadReportPdf } from '../components/ReportPdf'
 import {
   BaseTable,
   Card,
@@ -42,6 +44,7 @@ import {
   summarizeRetainerUsage,
   totalRevenueFromEntries,
 } from '../lib/billing'
+import { buildReportPdfData } from '../lib/reportPdf'
 import { sortRows, type SortDirection } from '../lib/tableUtils'
 import {
   downloadCsv,
@@ -67,6 +70,7 @@ const ReportsPage = () => {
   const [billableOnly, setBillableOnly] = useState(false)
   const [sortKey, setSortKey] = useState('date')
   const [sortDirection, setSortDirection] = useState<SortDirection>('desc')
+  const [previewOpen, setPreviewOpen] = useState(false)
 
   const { data: entries = [], isLoading } = useTimeEntries({
     clientId: clientId || undefined,
@@ -156,6 +160,42 @@ const ReportsPage = () => {
       sortAccessors[sortKey as keyof typeof sortAccessors],
     )
   }, [entries, sortKey, sortDirection, sortAccessors])
+
+  const reportPdfData = useMemo(
+    () =>
+      buildReportPdfData({
+        entries: sortedEntries,
+        segmentsByEntryId,
+        startDate,
+        endDate,
+        clientLabel:
+          clientId && clients.find((c) => c.id === clientId)
+            ? clients.find((c) => c.id === clientId)!.name
+            : 'All clients',
+        projectLabel:
+          projectId && filteredProjects.find((p) => p.id === projectId)
+            ? filteredProjects.find((p) => p.id === projectId)!.name
+            : 'All projects',
+        billableOnly,
+        totalSeconds: summary.totalSeconds,
+        billableSeconds: summary.billableSeconds,
+        revenue: summary.revenue,
+        retainerSummaries,
+      }),
+    [
+      sortedEntries,
+      segmentsByEntryId,
+      startDate,
+      endDate,
+      clientId,
+      clients,
+      projectId,
+      filteredProjects,
+      billableOnly,
+      summary,
+      retainerSummaries,
+    ],
+  )
 
   const toggleSort = (key: string) => {
     if (sortKey === key) {
@@ -394,6 +434,21 @@ const ReportsPage = () => {
           <Button variant="secondary" onClick={exportCsv} disabled={entries.length === 0}>
             Export CSV
           </Button>
+          <Button
+            variant="secondary"
+            onClick={() => setPreviewOpen(true)}
+            disabled={entries.length === 0}
+          >
+            Preview PDF
+          </Button>
+          <Button
+            onClick={() =>
+              downloadReportPdf(reportPdfData, startDate, endDate)
+            }
+            disabled={entries.length === 0}
+          >
+            Download PDF
+          </Button>
         </ExportRow>
 
         <Card>
@@ -408,6 +463,14 @@ const ReportsPage = () => {
             onSort={toggleSort}
           />
         </Card>
+
+        <ModalReportPreview
+          open={previewOpen}
+          report={reportPdfData}
+          startDate={startDate}
+          endDate={endDate}
+          onClose={() => setPreviewOpen(false)}
+        />
       </PageStack>
     </PageContainer>
   )
@@ -478,7 +541,9 @@ const CompactStatValue = styled(StatValue)`
 
 const ExportRow = styled.div`
   display: flex;
+  flex-wrap: wrap;
   justify-content: flex-end;
+  gap: 0.75rem;
 `
 
 const Emphasis = styled.span`
