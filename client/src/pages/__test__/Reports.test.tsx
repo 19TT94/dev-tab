@@ -14,5 +14,8 @@ describe('ReportsPage', () => {
     await waitFor(() =>
       expect(screen.queryByText('Loading...')).not.toBeInTheDocument(),
     )
+
+    expect(screen.getByRole('button', { name: 'Preview PDF' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Download PDF' })).toBeInTheDocument()
   })
 })
