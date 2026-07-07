@@ -1,3 +1,4 @@
+// TODO: for some reason the overage indicator is showing on every entry
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import styled from 'styled-components'
 
