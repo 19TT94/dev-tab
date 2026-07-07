@@ -10,6 +10,7 @@ import {
   hasRetainerBilling,
   isOverageLineItem,
   segmentsToLineItems,
+  summaryLineItemDescription,
   summarizeRetainerUsage,
   totalRevenueFromEntries,
 } from '../billing'
@@ -105,6 +106,15 @@ describe('segmentsToLineItems', () => {
     expect(items).toHaveLength(1)
     expect(items[0].hours).toBe(1)
     expect(items[0].time_entry_ids).toEqual(['e1', 'e2'])
+    expect(items[0].description).toBe('')
+  })
+})
+
+describe('summaryLineItemDescription', () => {
+  it('returns tier labels for retainer and overage', () => {
+    expect(summaryLineItemDescription('standard')).toBe('')
+    expect(summaryLineItemDescription('retainer')).toBe('Retainer')
+    expect(summaryLineItemDescription('overage')).toBe('Overage')
   })
 })
 
@@ -117,10 +127,11 @@ describe('groupEntriesIntoLineItems', () => {
       rate: 100,
       amount: 100,
       tier: 'standard',
+      description: '',
     })
   })
 
-  it('tags overage line items', () => {
+  it('uses summary descriptions for overage line items', () => {
     const client = makeRetainerClient({ retainer_hours_per_month: 0.01 })
     const entry = makeTimeEntry({
       duration_seconds: 3600,
@@ -130,7 +141,7 @@ describe('groupEntriesIntoLineItems', () => {
     const overageItem = items.find((item) => item.tier === 'overage')
     expect(overageItem).toBeDefined()
     expect(overageItem!.tier).toBe('overage')
-    expect(overageItem!.description).toBe('● Emergency fix')
+    expect(overageItem!.description).toBe('Overage')
   })
 })
 
@@ -177,6 +188,10 @@ describe('isOverageLineItem', () => {
     expect(
       isOverageLineItem({ description: 'Website Redesign — overage' }),
     ).toBe(true)
+  })
+
+  it('detects overage by summary description', () => {
+    expect(isOverageLineItem({ description: 'Overage' })).toBe(true)
   })
 })
 

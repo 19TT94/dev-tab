@@ -56,7 +56,7 @@ export function splitInvoiceDescription(description: string): string[] {
   if (!description.trim()) return []
   return description
     .split('\n')
-    .map((line) => line.trim())
+    .map((line) => line.trim().replace(/^[\u25CF\u2022●•]\s*/, ''))
     .filter(Boolean)
 }
 

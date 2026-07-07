@@ -126,25 +126,18 @@ function billWithRetainer(
   return segments
 }
 
-function formatLineItemDescription(descriptions: string[]): string {
-  if (descriptions.length === 0) return ''
-  return descriptions.map((description) => `● ${description}`).join('\n')
+const SUMMARY_LINE_ITEM_LABELS: Record<BillingTier, string> = {
+  standard: '',
+  retainer: 'Retainer',
+  overage: 'Overage',
 }
 
-function addEntryDescription(
-  descriptions: string[],
-  entryDescription: string | null,
-): string[] {
-  const text = entryDescription?.trim()
-  if (!text || descriptions.includes(text)) return descriptions
-  return [...descriptions, text]
+export function summaryLineItemDescription(tier: BillingTier): string {
+  return SUMMARY_LINE_ITEM_LABELS[tier]
 }
 
 export function segmentsToLineItems(segments: BilledSegment[]): DraftLineItem[] {
-  const groups = new Map<
-    string,
-    DraftLineItem & { descriptions: string[] }
-  >()
+  const groups = new Map<string, DraftLineItem>()
 
   for (const segment of segments) {
     const key = `${segment.project_id}:${segment.rate}:${segment.tier}`
@@ -155,23 +148,16 @@ export function segmentsToLineItems(segments: BilledSegment[]): DraftLineItem[] 
       if (!existing.time_entry_ids.includes(segment.entry_id)) {
         existing.time_entry_ids.push(segment.entry_id)
       }
-      existing.descriptions = addEntryDescription(
-        existing.descriptions,
-        segment.entry_description,
-      )
-      existing.description = formatLineItemDescription(existing.descriptions)
     } else {
-      const descriptions = addEntryDescription([], segment.entry_description)
       groups.set(key, {
         project_id: segment.project_id,
         project_name: segment.project_name,
-        description: formatLineItemDescription(descriptions),
+        description: summaryLineItemDescription(segment.tier),
         hours: segment.hours,
         rate: segment.rate,
         amount: segment.amount,
         time_entry_ids: [segment.entry_id],
         tier: segment.tier,
-        descriptions,
       })
     }
   }
@@ -222,7 +208,11 @@ export function isOverageLineItem(item: {
   tier?: BillingTier
   description: string
 }): boolean {
-  return item.tier === 'overage' || item.description.endsWith('— overage')
+  return (
+    item.tier === 'overage' ||
+    item.description === 'Overage' ||
+    item.description.endsWith('— overage')
+  )
 }
 
 export interface RetainerUsageSummary {
