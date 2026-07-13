@@ -1,4 +1,4 @@
-import { useEffect, useState, type FormEvent } from 'react'
+import { useState, type FormEvent } from 'react'
 import styled from 'styled-components'
 
 // Components
@@ -20,22 +20,23 @@ interface ModalTimeEntryFiltersProps {
   onClose: () => void
 }
 
-export const ModalTimeEntryFilters = ({
-  open,
+interface FilterFormProps {
+  startDate: string
+  endDate: string
+  onApply: (filter: TimeEntryDateFilter) => void
+  onClear: () => void
+  onClose: () => void
+}
+
+const FilterForm = ({
   startDate,
   endDate,
   onApply,
   onClear,
   onClose,
-}: ModalTimeEntryFiltersProps) => {
+}: FilterFormProps) => {
   const [draftStart, setDraftStart] = useState(startDate)
   const [draftEnd, setDraftEnd] = useState(endDate)
-
-  useEffect(() => {
-    if (!open) return
-    setDraftStart(startDate)
-    setDraftEnd(endDate)
-  }, [open, startDate, endDate])
 
   const rangeInvalid =
     draftStart !== '' && draftEnd !== '' && draftStart > draftEnd
@@ -55,46 +56,68 @@ export const ModalTimeEntryFilters = ({
   }
 
   return (
-    <Modal open={open} title="Filter entries" onClose={onClose} maxWidth="24rem">
-      <FormStack onSubmit={handleSubmit}>
-        <FormRow>
-          <Input
-            label="Start date"
-            type="date"
-            value={draftStart}
-            onChange={(event) => setDraftStart(event.target.value)}
-          />
-          <Input
-            label="End date"
-            type="date"
-            value={draftEnd}
-            onChange={(event) => setDraftEnd(event.target.value)}
-          />
-        </FormRow>
-        {rangeInvalid && (
-          <Text $color="danger" $size="xs">
-            Start date must be on or before end date.
-          </Text>
-        )}
-        <Actions>
-          <Button
-            type="button"
-            variant="secondary"
-            onClick={handleClear}
-            disabled={draftStart === '' && draftEnd === ''}
-          >
-            Clear
+    <FormStack onSubmit={handleSubmit}>
+      <FormRow>
+        <Input
+          label="Start date"
+          type="date"
+          value={draftStart}
+          onChange={(event) => setDraftStart(event.target.value)}
+        />
+        <Input
+          label="End date"
+          type="date"
+          value={draftEnd}
+          onChange={(event) => setDraftEnd(event.target.value)}
+        />
+      </FormRow>
+      {rangeInvalid && (
+        <Text $color="danger" $size="xs">
+          Start date must be on or before end date.
+        </Text>
+      )}
+      <Actions>
+        <Button
+          type="button"
+          variant="secondary"
+          onClick={handleClear}
+          disabled={draftStart === '' && draftEnd === ''}
+        >
+          Clear
+        </Button>
+        <ButtonRow>
+          <Button type="button" variant="secondary" onClick={onClose}>
+            Cancel
           </Button>
-          <ButtonRow>
-            <Button type="button" variant="secondary" onClick={onClose}>
-              Cancel
-            </Button>
-            <Button type="submit" disabled={rangeInvalid}>
-              Apply
-            </Button>
-          </ButtonRow>
-        </Actions>
-      </FormStack>
+          <Button type="submit" disabled={rangeInvalid}>
+            Apply
+          </Button>
+        </ButtonRow>
+      </Actions>
+    </FormStack>
+  )
+}
+
+export const ModalTimeEntryFilters = ({
+  open,
+  startDate,
+  endDate,
+  onApply,
+  onClear,
+  onClose,
+}: ModalTimeEntryFiltersProps) => {
+  return (
+    <Modal open={open} title="Filter entries" onClose={onClose} maxWidth="24rem">
+      {open && (
+        <FilterForm
+          key={`${startDate}|${endDate}`}
+          startDate={startDate}
+          endDate={endDate}
+          onApply={onApply}
+          onClear={onClear}
+          onClose={onClose}
+        />
+      )}
     </Modal>
   )
 }

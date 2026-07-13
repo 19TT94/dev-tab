@@ -82,13 +82,9 @@ const TimeEntriesPage = () => {
   const [modalOpen, setModalOpen] = useState(false)
   const [filterModalOpen, setFilterModalOpen] = useState(false)
   const [editing, setEditing] = useState<TimeEntryWithProject | null>(null)
-  const [startDate, setStartDate] = useState('')
-  const [endDate, setEndDate] = useState('')
 
-  useEffect(() => {
-    setStartDate(searchParams.get('startDate') ?? '')
-    setEndDate(searchParams.get('endDate') ?? '')
-  }, [searchParams])
+  const startDate = searchParams.get('startDate') ?? ''
+  const endDate = searchParams.get('endDate') ?? ''
 
   const filterByDate = useCallback(
     (entry: TimeEntryWithProject) =>
@@ -149,14 +145,10 @@ const TimeEntriesPage = () => {
   )
 
   const handleApplyFilters = (filter: TimeEntryDateFilter) => {
-    setStartDate(filter.startDate)
-    setEndDate(filter.endDate)
     syncDateParams(filter.startDate, filter.endDate)
   }
 
   const handleClearFilters = () => {
-    setStartDate('')
-    setEndDate('')
     syncDateParams('', '')
   }
 
