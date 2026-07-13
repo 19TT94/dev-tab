@@ -9,6 +9,8 @@ describe('Dashboard', () => {
 
     expect(screen.getByRole('heading', { name: 'Dashboard' })).toBeInTheDocument()
     expect(screen.getByText('00:00:00')).toBeInTheDocument()
+    expect(screen.getByText('This week')).toBeInTheDocument()
+    expect(screen.getByText('This month')).toBeInTheDocument()
 
     await waitFor(() =>
       expect(screen.getByText(/Today's entries|No time logged today yet/)).toBeInTheDocument(),

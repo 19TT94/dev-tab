@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useSearchParams } from 'react-router-dom'
 import styled from 'styled-components'
 
 // Hooks
@@ -10,14 +11,16 @@ import type { TimeEntryWithProject } from '../types/database'
 
 // Components
 import { ModalAddEntry } from '../components/ModalAddEntry'
-import { EntryOverageIndicator } from '../components/EntryOverageIndicator'
+import {
+  ModalTimeEntryFilters,
+  type TimeEntryDateFilter,
+} from '../components/ModalTimeEntryFilters'
+import { ActionMenu } from '../components/ActionMenu'
 import { Button } from '../components/Button'
 import {
   BaseTable,
-  ButtonRow,
   Card,
   InlineInput,
-  InlineSelect,
   MonoText,
   MutedHint,
   PageContainer,
@@ -28,26 +31,20 @@ import {
   Pagination,
   StatusNo,
   StatusYes,
+  Text,
   type TableColumn,
 } from '../components/ui'
 
 // Utils
-import { billEntriesForReport } from '../lib/billing'
-import {
-  getDayOptions,
-  getMonthOptions,
-  getYearsFromDates,
-  matchesDateParts,
-} from '../lib/tableUtils'
 import {
   formatDateTime,
   formatDuration,
   formatHours,
+  isWithinLocalDateRange,
+  parseDateInputValue,
 } from '../lib/utils'
 
 const PAGE_SIZE = 10
-const MONTH_OPTIONS = getMonthOptions()
-const DAY_OPTIONS = getDayOptions()
 
 const searchTimeEntry = (entry: TimeEntryWithProject, query: string) => {
   const haystack = [
@@ -61,34 +58,38 @@ const searchTimeEntry = (entry: TimeEntryWithProject, query: string) => {
   return haystack.includes(query)
 }
 
+const formatFilterDate = (value: string) =>
+  parseDateInputValue(value).toLocaleDateString('en-US', {
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric',
+  })
+
+const formatDateRangeLabel = (startDate: string, endDate: string) => {
+  if (startDate && endDate) {
+    if (startDate === endDate) return formatFilterDate(startDate)
+    return `${formatFilterDate(startDate)} – ${formatFilterDate(endDate)}`
+  }
+  if (startDate) return `From ${formatFilterDate(startDate)}`
+  if (endDate) return `Through ${formatFilterDate(endDate)}`
+  return ''
+}
+
 const TimeEntriesPage = () => {
+  const [searchParams, setSearchParams] = useSearchParams()
   const { data: entries = [], isLoading } = useTimeEntries()
   const { create, update, remove } = useTimeEntryMutations()
   const [modalOpen, setModalOpen] = useState(false)
+  const [filterModalOpen, setFilterModalOpen] = useState(false)
   const [editing, setEditing] = useState<TimeEntryWithProject | null>(null)
-  const [year, setYear] = useState('')
-  const [month, setMonth] = useState('')
-  const [day, setDay] = useState('')
 
-  const segmentsByEntryId = useMemo(
-    () => billEntriesForReport(entries),
-    [entries],
-  )
-
-  const yearOptions = useMemo(
-    () => getYearsFromDates(entries.map((entry) => entry.started_at)),
-    [entries],
-  )
-
-  const dateFilter = useMemo(
-    () => ({ year, month, day }),
-    [year, month, day],
-  )
+  const startDate = searchParams.get('startDate') ?? ''
+  const endDate = searchParams.get('endDate') ?? ''
 
   const filterByDate = useCallback(
     (entry: TimeEntryWithProject) =>
-      matchesDateParts(entry.started_at, dateFilter),
-    [dateFilter],
+      isWithinLocalDateRange(entry.started_at, startDate || undefined, endDate || undefined),
+    [startDate, endDate],
   )
 
   const sortAccessors = useMemo(
@@ -126,7 +127,30 @@ const TimeEntriesPage = () => {
 
   useEffect(() => {
     setPage(1)
-  }, [year, month, day, setPage])
+  }, [startDate, endDate, setPage])
+
+  const syncDateParams = useCallback(
+    (nextStart: string, nextEnd: string) => {
+      const params = new URLSearchParams(searchParams)
+      if (nextStart) params.set('startDate', nextStart)
+      else params.delete('startDate')
+      if (nextEnd) params.set('endDate', nextEnd)
+      else params.delete('endDate')
+      params.delete('year')
+      params.delete('month')
+      params.delete('day')
+      setSearchParams(params, { replace: true })
+    },
+    [searchParams, setSearchParams],
+  )
+
+  const handleApplyFilters = (filter: TimeEntryDateFilter) => {
+    syncDateParams(filter.startDate, filter.endDate)
+  }
+
+  const handleClearFilters = () => {
+    syncDateParams('', '')
+  }
 
   const closeModal = () => {
     setModalOpen(false)
@@ -203,12 +227,6 @@ const TimeEntriesPage = () => {
         render: (entry) => (
           <>
             {entry.billable ? <StatusYes>Yes</StatusYes> : <StatusNo>No</StatusNo>}
-            {entry.billable && (
-              <EntryOverageIndicator
-                segments={segmentsByEntryId.get(entry.id) ?? []}
-                totalSeconds={entry.duration_seconds}
-              />
-            )}
             {entry.invoice_id && (
               <MutedHint>
                 <br />
@@ -221,35 +239,37 @@ const TimeEntriesPage = () => {
       {
         key: 'actions',
         header: '',
+        align: 'right',
         render: (entry) => (
-          <ButtonRow>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => {
-                setEditing(entry)
-                setModalOpen(true)
-              }}
-              disabled={!!entry.invoice_id}
-            >
-              Edit
-            </Button>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => handleDelete(entry.id)}
-              disabled={!!entry.invoice_id}
-            >
-              Delete
-            </Button>
-          </ButtonRow>
+          <ActionMenu
+            label={`Actions for ${entry.projects.name}`}
+            disabled={!!entry.invoice_id}
+            items={[
+              {
+                label: 'Edit',
+                onSelect: () => {
+                  setEditing(entry)
+                  setModalOpen(true)
+                },
+              },
+              {
+                label: 'Delete',
+                variant: 'danger',
+                onSelect: () => {
+                  void handleDelete(entry.id)
+                },
+              },
+            ]}
+          />
         ),
       },
     ],
-    [handleDelete, segmentsByEntryId],
+    [handleDelete],
   )
 
-  const hasFilters = search.length > 0 || year !== '' || month !== '' || day !== ''
+  const hasDateFilter = startDate !== '' || endDate !== ''
+  const hasFilters = search.length > 0 || hasDateFilter
+  const dateRangeLabel = formatDateRangeLabel(startDate, endDate)
 
   const emptyMessage =
     entries.length === 0
@@ -283,6 +303,15 @@ const TimeEntriesPage = () => {
           onClose={closeModal}
         />
 
+        <ModalTimeEntryFilters
+          open={filterModalOpen}
+          startDate={startDate}
+          endDate={endDate}
+          onApply={handleApplyFilters}
+          onClear={handleClearFilters}
+          onClose={() => setFilterModalOpen(false)}
+        />
+
         <Card>
           <BaseTable
             columns={columns}
@@ -302,42 +331,29 @@ const TimeEntriesPage = () => {
                   aria-label="Search by project, client, or description"
                   onChange={(event) => setSearch(event.target.value)}
                 />
-                <FilterSelect
-                  value={year}
-                  aria-label="Filter by year"
-                  onChange={(event) => setYear(event.target.value)}
+                <Button
+                  type="button"
+                  variant="secondary"
+                  size="sm"
+                  onClick={() => setFilterModalOpen(true)}
                 >
-                  <option value="">All years</option>
-                  {yearOptions.map((option) => (
-                    <option key={option} value={String(option)}>
-                      {option}
-                    </option>
-                  ))}
-                </FilterSelect>
-                <FilterSelect
-                  value={month}
-                  aria-label="Filter by month"
-                  onChange={(event) => setMonth(event.target.value)}
-                >
-                  <option value="">All months</option>
-                  {MONTH_OPTIONS.map((option) => (
-                    <option key={option.value} value={option.value}>
-                      {option.label}
-                    </option>
-                  ))}
-                </FilterSelect>
-                <FilterSelect
-                  value={day}
-                  aria-label="Filter by day"
-                  onChange={(event) => setDay(event.target.value)}
-                >
-                  <option value="">All days</option>
-                  {DAY_OPTIONS.map((option) => (
-                    <option key={option.value} value={option.value}>
-                      {option.label}
-                    </option>
-                  ))}
-                </FilterSelect>
+                  {hasDateFilter ? 'Edit filters' : 'Filters'}
+                </Button>
+                {hasDateFilter && (
+                  <ActiveFilter>
+                    <Text $size="xs" $color="muted">
+                      {dateRangeLabel}
+                    </Text>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      onClick={handleClearFilters}
+                    >
+                      Clear
+                    </Button>
+                  </ActiveFilter>
+                )}
               </ToolbarRow>
             }
           />
@@ -368,9 +384,10 @@ const SearchInput = styled(InlineInput)`
   max-width: 20rem;
 `
 
-const FilterSelect = styled(InlineSelect)`
-  width: auto;
-  min-width: 7rem;
+const ActiveFilter = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
 `
 
 const ProjectName = styled.div`

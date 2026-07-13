@@ -11,6 +11,7 @@ import type {
   TimeEntryWithProject,
 } from '../types/database'
 import { INVOICE_NUMBER_START, MOCK_USER_ID } from './config'
+import { toIsoEndOfLocalDay, toIsoStartOfLocalDay } from './dateUtils'
 
 const STORAGE_KEY = 'personal-invoice-mock-data'
 
@@ -455,12 +456,12 @@ export const mockStore = {
     }
     if (filters.startDate) {
       entries = entries.filter(
-        (e) => e.started_at >= `${filters.startDate}T00:00:00`,
+        (e) => e.started_at >= toIsoStartOfLocalDay(filters.startDate!),
       )
     }
     if (filters.endDate) {
       entries = entries.filter(
-        (e) => e.started_at <= `${filters.endDate}T23:59:59`,
+        (e) => e.started_at <= toIsoEndOfLocalDay(filters.endDate!),
       )
     }
     if (filters.billableOnly) {

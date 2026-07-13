@@ -1,3 +1,6 @@
+// TODO: add ability to edit invoices
+// TODO: add a link to report build a report for the invoice
+// TODO: don't allow duplicate line items in invoices
 import { useState } from 'react'
 import styled from 'styled-components'
 

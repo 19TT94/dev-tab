@@ -2,6 +2,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { isMockMode } from '../lib/config'
 import { mockStore } from '../lib/mockStore'
 import { supabase } from '../lib/supabase'
+import { toIsoEndOfLocalDay, toIsoStartOfLocalDay } from '../lib/dateUtils'
 import type { TimeEntryWithProject } from '../types/database'
 import { useAuth } from './useAuth'
 
@@ -32,10 +33,10 @@ export function useTimeEntries(filters: TimeEntryFilters = {}) {
         query = query.eq('project_id', filters.projectId)
       }
       if (filters.startDate) {
-        query = query.gte('started_at', `${filters.startDate}T00:00:00`)
+        query = query.gte('started_at', toIsoStartOfLocalDay(filters.startDate))
       }
       if (filters.endDate) {
-        query = query.lte('started_at', `${filters.endDate}T23:59:59`)
+        query = query.lte('started_at', toIsoEndOfLocalDay(filters.endDate))
       }
       if (filters.billableOnly) {
         query = query.eq('billable', true)

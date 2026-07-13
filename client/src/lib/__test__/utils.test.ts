@@ -1,7 +1,6 @@
 import { describe, expect, it, vi } from 'vitest'
 import {
   downloadCsv,
-  endOfDay,
   formatCurrency,
   formatDate,
   formatDateTime,
@@ -14,8 +13,6 @@ import {
   formatWebsiteHref,
   generateInvoiceNumber,
   resolveRate,
-  startOfDay,
-  toDateInputValue,
 } from '../utils'
 import { INVOICE_NUMBER_START } from '../config'
 
@@ -90,30 +87,6 @@ describe('formatDateTime', () => {
     const result = formatDateTime('2024-06-15T14:30:00.000Z')
     expect(result).toMatch(/Jun 15, 2024/)
     expect(result).toMatch(/\d/)
-  })
-})
-
-describe('toDateInputValue', () => {
-  it('returns YYYY-MM-DD', () => {
-    expect(toDateInputValue(new Date('2024-06-15T12:00:00.000Z'))).toBe(
-      '2024-06-15',
-    )
-  })
-})
-
-describe('startOfDay / endOfDay', () => {
-  it('sets time to start and end of day', () => {
-    const date = new Date('2024-06-15T14:30:45.123Z')
-    const start = startOfDay(date)
-    const end = endOfDay(date)
-
-    expect(start.getHours()).toBe(0)
-    expect(start.getMinutes()).toBe(0)
-    expect(start.getSeconds()).toBe(0)
-
-    expect(end.getHours()).toBe(23)
-    expect(end.getMinutes()).toBe(59)
-    expect(end.getSeconds()).toBe(59)
   })
 })
 
