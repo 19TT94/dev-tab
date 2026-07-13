@@ -1,4 +1,5 @@
-import { useMemo } from 'react'
+import { useEffect, useMemo, useState } from 'react'
+import { Link } from 'react-router-dom'
 import styled from 'styled-components'
 
 // Hooks
@@ -11,6 +12,7 @@ import {
   Card,
   CardHeader,
   CardTitle,
+  Grid,
   List,
   ListItem,
   MonoText,
@@ -19,6 +21,9 @@ import {
   PageStack,
   PageSubtitle,
   PageTitle,
+  StatCard,
+  StatLabel,
+  StatValue,
   Text,
 } from '../components/ui'
 
@@ -28,19 +33,46 @@ import {
   formatDateTime,
   formatDuration,
   formatHours,
+  getWeekStart,
   toDateInputValue,
 } from '../lib/utils'
 
 const Dashboard = () => {
-  const today = toDateInputValue(new Date())
+  const [now, setNow] = useState(() => new Date())
+
+  useEffect(() => {
+    const syncNow = () => {
+      const current = new Date()
+      setNow((prev) =>
+        toDateInputValue(prev) === toDateInputValue(current) ? prev : current,
+      )
+    }
+
+    syncNow()
+    const interval = setInterval(syncNow, 60_000)
+    window.addEventListener('focus', syncNow)
+
+    return () => {
+      clearInterval(interval)
+      window.removeEventListener('focus', syncNow)
+    }
+  }, [])
+
+  const today = toDateInputValue(now)
+  const weekStart = toDateInputValue(getWeekStart(now))
   const monthStart = useMemo(() => {
-    const d = new Date()
+    const d = new Date(now)
     d.setDate(1)
     return toDateInputValue(d)
-  }, [])
+  }, [now])
 
   const { data: entries = [], isLoading } = useTimeEntries({
     startDate: today,
+    endDate: today,
+  })
+
+  const { data: weekEntries = [] } = useTimeEntries({
+    startDate: weekStart,
     endDate: today,
   })
 
@@ -55,6 +87,23 @@ const Dashboard = () => {
   )
 
   const totalSeconds = entries.reduce((sum, e) => sum + e.duration_seconds, 0)
+  const weekTotalSeconds = weekEntries.reduce(
+    (sum, e) => sum + e.duration_seconds,
+    0,
+  )
+  const monthTotalSeconds = monthEntries.reduce(
+    (sum, e) => sum + e.duration_seconds,
+    0,
+  )
+
+  const weekFilterUrl = `/time?${new URLSearchParams({
+    startDate: weekStart,
+    endDate: today,
+  })}`
+  const monthFilterUrl = `/time?${new URLSearchParams({
+    startDate: monthStart,
+    endDate: today,
+  })}`
 
   return (
     <PageContainer $maxWidth="42rem">
@@ -64,7 +113,6 @@ const Dashboard = () => {
           <PageSubtitle>Track time and review today&apos;s work</PageSubtitle>
         </div>
 
-        {/* TODO: add autobillable - i.e. if time entry is > 8 hours, set billable to true */}
         <Timer />
 
         <Card>
@@ -73,7 +121,6 @@ const Dashboard = () => {
             <Text $color="muted">{formatHours(totalSeconds)} hrs total</Text>
           </CardHeader>
 
-          {/* TODO: Add Weekly & Monthly Summaries */}
           {isLoading ? (
             <Text $color="muted" style={{ padding: '1.25rem' }}>Loading...</Text>
           ) : entries.length === 0 ? (
@@ -113,6 +160,19 @@ const Dashboard = () => {
             </List>
           )}
         </Card>
+
+        <Grid $cols={2}>
+          <SummaryCard as={Link} to={weekFilterUrl}>
+            <StatLabel>This week</StatLabel>
+            <StatValue>{formatHours(weekTotalSeconds)}</StatValue>
+            <SummaryHint>View entries</SummaryHint>
+          </SummaryCard>
+          <SummaryCard as={Link} to={monthFilterUrl}>
+            <StatLabel>This month</StatLabel>
+            <StatValue>{formatHours(monthTotalSeconds)}</StatValue>
+            <SummaryHint>View entries</SummaryHint>
+          </SummaryCard>
+        </Grid>
       </PageStack>
     </PageContainer>
   )
@@ -155,6 +215,22 @@ const DurationValue = styled.p`
 const NonBillable = styled.span`
   font-size: ${({ theme }) => theme.fontSizes.xs};
   color: ${({ theme }) => theme.colors.accent};
+`
+
+const SummaryCard = styled(StatCard)`
+  text-decoration: none;
+  color: inherit;
+  display: block;
+  cursor: pointer;
+
+  &:hover {
+    filter: brightness(0.92);
+  }
+`
+
+const SummaryHint = styled(MutedHint)`
+  display: block;
+  margin-top: 0.5rem;
 `
 
 export default Dashboard

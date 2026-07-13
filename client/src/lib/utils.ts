@@ -94,21 +94,17 @@ export function formatDateTime(date: string): string {
   })
 }
 
-export function toDateInputValue(date: Date): string {
-  return date.toISOString().slice(0, 10)
-}
-
-export function startOfDay(date: Date): Date {
-  const d = new Date(date)
-  d.setHours(0, 0, 0, 0)
-  return d
-}
-
-export function endOfDay(date: Date): Date {
-  const d = new Date(date)
-  d.setHours(23, 59, 59, 999)
-  return d
-}
+export {
+  endOfDay,
+  getWeekStart,
+  isWithinLocalDateRange,
+  localDateInputFromIso,
+  parseDateInputValue,
+  startOfDay,
+  toDateInputValue,
+  toIsoEndOfLocalDay,
+  toIsoStartOfLocalDay,
+} from './dateUtils'
 
 export function resolveRate(
   projectRate: number | null,
