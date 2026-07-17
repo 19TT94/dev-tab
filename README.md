@@ -2,8 +2,7 @@
 
 A stripped-down time tracking and invoicing app for billing contract clients. Built with React, Supabase, and deployed on Netlify.
 
-Live site: devtab.ttobin.com
-Demo site: https://stage--dev-tab.netlify.app/
+Check out [Demo](https://stage--dev-tab.netlify.app/)
 
 ## Features
 
