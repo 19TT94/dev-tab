@@ -1,6 +1,9 @@
 import { INVOICE_NUMBER_START, isMockMode } from './config'
+import { parseDateInputValue } from './dateUtils'
 import { mockStore } from './mockStore'
 import { supabase } from './supabase'
+
+const DATE_ONLY_RE = /^\d{4}-\d{2}-\d{2}$/
 
 export function formatDuration(seconds: number): string {
   const h = Math.floor(seconds / 3600)
@@ -21,7 +24,13 @@ export function formatCurrency(amount: number): string {
 }
 
 export function formatDate(date: string): string {
-  return new Date(date).toLocaleDateString('en-US', {
+  // Date-only values (invoice period_start/period_end) are calendar dates.
+  // `new Date('YYYY-MM-DD')` parses as UTC midnight and shifts the local day.
+  const value = DATE_ONLY_RE.test(date)
+    ? parseDateInputValue(date)
+    : new Date(date)
+
+  return value.toLocaleDateString('en-US', {
     month: 'short',
     day: 'numeric',
     year: 'numeric',
