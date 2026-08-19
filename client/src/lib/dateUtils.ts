@@ -5,6 +5,12 @@ export function toDateInputValue(date: Date): string {
   return `${year}-${month}-${day}`
 }
 
+export function toTimeInputValue(date: Date): string {
+  const hours = String(date.getHours()).padStart(2, '0')
+  const minutes = String(date.getMinutes()).padStart(2, '0')
+  return `${hours}:${minutes}`
+}
+
 export function parseDateInputValue(value: string): Date {
   const [year, month, day] = value.split('-').map(Number)
   return new Date(year, month - 1, day)
@@ -12,6 +18,10 @@ export function parseDateInputValue(value: string): Date {
 
 export function localDateInputFromIso(isoDate: string): string {
   return toDateInputValue(new Date(isoDate))
+}
+
+export function localTimeInputFromIso(isoDate: string): string {
+  return toTimeInputValue(new Date(isoDate))
 }
 
 export function startOfDay(date: Date): Date {

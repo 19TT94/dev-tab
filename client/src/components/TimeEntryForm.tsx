@@ -4,13 +4,20 @@ import { useForm, useWatch } from 'react-hook-form'
 // Hooks
 import { useProjects } from '../hooks/useProjects'
 
-// Types
-import type { TimeEntryWithProject } from '../types/database'
-
 // Components
 import { Button } from './Button'
 import { Input, Select } from './FormFields'
 import { ButtonRow, Checkbox, CheckboxLabel, FormRow, FormStack } from './ui'
+
+// Utils
+import {
+  localDateInputFromIso,
+  localTimeInputFromIso,
+  toDateInputValue,
+} from '../lib/utils'
+
+// Types
+import type { TimeEntryWithProject } from '../types/database'
 
 interface TimeEntryFormData {
   project_id: string
@@ -43,15 +50,15 @@ export const TimeEntryForm = ({ entry, onSubmit, onCancel }: TimeEntryFormProps)
         ? {
             project_id: entry.project_id,
             description: entry.description ?? '',
-            date: entry.started_at.slice(0, 10),
-            start_time: entry.started_at.slice(11, 16),
-            end_time: entry.ended_at.slice(11, 16),
+            date: localDateInputFromIso(entry.started_at),
+            start_time: localTimeInputFromIso(entry.started_at),
+            end_time: localTimeInputFromIso(entry.ended_at),
             billable: entry.billable,
           }
         : {
             project_id: '',
             description: '',
-            date: new Date().toISOString().slice(0, 10),
+            date: toDateInputValue(new Date()),
             start_time: '09:00',
             end_time: '10:00',
             billable: true,
