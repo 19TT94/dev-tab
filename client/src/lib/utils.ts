@@ -108,9 +108,11 @@ export {
   getWeekStart,
   isWithinLocalDateRange,
   localDateInputFromIso,
+  localTimeInputFromIso,
   parseDateInputValue,
   startOfDay,
   toDateInputValue,
+  toTimeInputValue,
   toIsoEndOfLocalDay,
   toIsoStartOfLocalDay,
 } from './dateUtils'

@@ -4,9 +4,11 @@ import {
   getWeekStart,
   isWithinLocalDateRange,
   localDateInputFromIso,
+  localTimeInputFromIso,
   parseDateInputValue,
   startOfDay,
   toDateInputValue,
+  toTimeInputValue,
   toIsoEndOfLocalDay,
   toIsoStartOfLocalDay,
 } from '../dateUtils'
@@ -39,10 +41,23 @@ describe('localDayBounds', () => {
   })
 })
 
+describe('toTimeInputValue', () => {
+  it('returns the local time as HH:mm', () => {
+    expect(toTimeInputValue(new Date(2024, 5, 15, 9, 5))).toBe('09:05')
+  })
+})
+
 describe('localDateInputFromIso', () => {
   it('uses the local calendar date instead of the UTC date prefix', () => {
     const localMidnight = new Date(2024, 5, 15, 0, 0, 0)
     expect(localDateInputFromIso(localMidnight.toISOString())).toBe('2024-06-15')
+  })
+})
+
+describe('localTimeInputFromIso', () => {
+  it('uses the local clock time instead of the UTC time prefix', () => {
+    const localMorning = new Date(2024, 5, 15, 9, 0, 0)
+    expect(localTimeInputFromIso(localMorning.toISOString())).toBe('09:00')
   })
 })
 
