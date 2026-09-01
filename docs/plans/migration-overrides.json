@@ -1,0 +1,12 @@
+{
+  "$comment": "Production migration overrides — see docs/plans/project-scoped-billing.md",
+  "clients": {
+    "bb05eb7e-5726-45db-8915-6149365544e4": {
+      "retainerProjectId": "fd28d43e-5eb4-4938-b8a4-22b440ef911c",
+      "notes": "Fluid Resource Managment: single project (Hero Builder). Copy 40 hr/mo retainer from client. Set hourly_rate to 150 (project currently 0)."
+    },
+    "c4398661-03e1-43ba-80d0-ac35a842d591": {
+      "notes": "Wiere Weddings: hourly only. Set hourly_rate to 150, retainer off. No override needed (single project, no client retainer)."
+    }
+  }
+}
