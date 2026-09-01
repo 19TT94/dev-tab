@@ -6,19 +6,17 @@ import type { ProjectWithClient } from '../types/database'
 // Components
 import { Button } from './Button'
 import { Input } from './FormFields'
-import { ButtonRow, Checkbox, CheckboxLabel, FormStack } from './ui'
+import { ButtonRow, FormStack } from './ui'
 
 export interface ProjectFormPayload {
   client_id: string
   name: string
   hourly_rate: number | null
-  billable: boolean
 }
 
 interface ProjectFormData {
   name: string
   hourly_rate: string
-  billable: boolean
 }
 
 interface ProjectFormProps {
@@ -34,9 +32,8 @@ export const ProjectForm = ({ clientId, project, onSave, onCancel }: ProjectForm
       ? {
           name: project.name,
           hourly_rate: project.hourly_rate?.toString() ?? '',
-          billable: project.billable,
         }
-      : { name: '', hourly_rate: '', billable: true },
+      : { name: '', hourly_rate: '' },
   })
 
   const submit = handleSubmit(async (data) => {
@@ -44,7 +41,6 @@ export const ProjectForm = ({ clientId, project, onSave, onCancel }: ProjectForm
       client_id: clientId,
       name: data.name,
       hourly_rate: data.hourly_rate ? parseFloat(data.hourly_rate) : null,
-      billable: data.billable,
     })
   })
 
@@ -58,10 +54,6 @@ export const ProjectForm = ({ clientId, project, onSave, onCancel }: ProjectForm
         min="0"
         {...register('hourly_rate')}
       />
-      <CheckboxLabel>
-        <Checkbox {...register('billable')} />
-        Billable by default
-      </CheckboxLabel>
       <ButtonRow>
         <Button type="submit" size="sm" disabled={isSubmitting}>
           {isSubmitting ? 'Saving...' : 'Save Project'}

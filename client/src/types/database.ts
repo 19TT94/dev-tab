@@ -20,7 +20,6 @@ export interface Project {
   client_id: string
   name: string
   hourly_rate: number | null
-  billable: boolean
   archived: boolean
   created_at: string
 }
