@@ -82,6 +82,11 @@ describe('formatDate', () => {
   it('formats ISO date strings', () => {
     expect(formatDate('2024-06-15T12:00:00.000Z')).toMatch(/Jun 15, 2024/)
   })
+
+  it('formats date-only values as local calendar dates', () => {
+    expect(formatDate('2026-08-01')).toBe('Aug 1, 2026')
+    expect(formatDate('2026-08-03')).toBe('Aug 3, 2026')
+  })
 })
 
 describe('formatDateTime', () => {

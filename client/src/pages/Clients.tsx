@@ -76,7 +76,6 @@ const ClientsPage = () => {
         id: editingProject.id,
         name: data.name,
         hourly_rate: data.hourly_rate,
-        billable: data.billable,
       })
     } else {
       await projectMutations.create.mutateAsync(data)
@@ -213,7 +212,7 @@ const ClientsPage = () => {
                                     {project.hourly_rate != null
                                       ? formatCurrency(project.hourly_rate)
                                       : formatCurrency(client.default_hourly_rate)}{' '}
-                                    /hr · {project.billable ? 'Billable' : 'Non-billable'}
+                                    /hr
                                   </ProjectMeta>
                                 </div>
                                 <ButtonRow>

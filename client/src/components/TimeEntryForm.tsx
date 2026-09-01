@@ -1,5 +1,4 @@
-import { useEffect } from 'react'
-import { useForm, useWatch } from 'react-hook-form'
+import { useForm } from 'react-hook-form'
 
 // Hooks
 import { useProjects } from '../hooks/useProjects'
@@ -8,6 +7,13 @@ import { useProjects } from '../hooks/useProjects'
 import { Button } from './Button'
 import { Input, Select } from './FormFields'
 import { ButtonRow, Checkbox, CheckboxLabel, FormRow, FormStack } from './ui'
+
+// Utils
+import {
+  localDateInputFromIso,
+  localTimeInputFromIso,
+  toDateInputValue,
+} from '../lib/utils'
 
 // Types
 import type { TimeEntryWithProject } from '../types/database'
@@ -37,35 +43,26 @@ interface TimeEntryFormProps {
 export const TimeEntryForm = ({ entry, onSubmit, onCancel }: TimeEntryFormProps) => {
   const { data: projects = [] } = useProjects()
 
-  const { register, handleSubmit, control, setValue, formState: { isSubmitting } } =
+  const { register, handleSubmit, formState: { isSubmitting } } =
     useForm<TimeEntryFormData>({
       defaultValues: entry
         ? {
             project_id: entry.project_id,
             description: entry.description ?? '',
-            date: entry.started_at.slice(0, 10),
-            start_time: entry.started_at.slice(11, 16),
-            end_time: entry.ended_at.slice(11, 16),
+            date: localDateInputFromIso(entry.started_at),
+            start_time: localTimeInputFromIso(entry.started_at),
+            end_time: localTimeInputFromIso(entry.ended_at),
             billable: entry.billable,
           }
         : {
             project_id: '',
             description: '',
-            date: new Date().toISOString().slice(0, 10),
+            date: toDateInputValue(new Date()),
             start_time: '09:00',
             end_time: '10:00',
             billable: true,
           },
     })
-
-  const projectId = useWatch({ control, name: 'project_id' })
-  const selectedProject = projects.find((p) => p.id === projectId)
-
-  useEffect(() => {
-    if (selectedProject && !entry) {
-      setValue('billable', selectedProject.billable)
-    }
-  }, [selectedProject, entry, setValue])
 
   const projectOptions = [
     { value: '', label: 'Select project...' },

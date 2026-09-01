@@ -54,7 +54,6 @@ export function makeTimeEntry(
       client_id: client.id,
       name: 'Test Project',
       hourly_rate: null,
-      billable: true,
       archived: false,
       created_at: '2024-01-01T00:00:00.000Z',
       clients: {
