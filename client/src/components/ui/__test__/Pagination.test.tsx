@@ -3,7 +3,10 @@ import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { ThemeProvider } from 'styled-components'
 
+// Components
 import { Pagination } from '../Pagination'
+
+// Styles
 import { theme } from '../../../styles/theme'
 
 const renderPagination = (

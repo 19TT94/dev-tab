@@ -1,4 +1,6 @@
 import 'styled-components'
+
+// Types
 import type { AppTheme } from './theme'
 
 declare module 'styled-components' {

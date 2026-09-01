@@ -6,9 +6,6 @@ import { useClients } from '../hooks/useClients'
 import { useInvoiceMutations } from '../hooks/useInvoices'
 import { useTimeEntries } from '../hooks/useTimeEntries'
 
-// Types
-import type { DraftLineItem } from '../types/database'
-
 // Components
 import { Button } from './Button'
 import { Input, Select, Textarea, InlineInput } from './FormFields'
@@ -24,6 +21,9 @@ import {
 // Utils
 import { groupEntriesIntoLineItems, isOverageLineItem } from '../lib/billing'
 import { formatCurrency, toDateInputValue } from '../lib/utils'
+
+// Types
+import type { DraftLineItem } from '../types/database'
 
 interface InvoiceWizardProps {
   onClose: () => void

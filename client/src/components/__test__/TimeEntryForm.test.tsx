@@ -1,7 +1,11 @@
 import { describe, expect, it, vi } from 'vitest'
 import { screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
+
+// Components
 import { TimeEntryForm } from '../TimeEntryForm'
+
+// Utils
 import { renderWithProviders } from '../../test/render'
 import { makeTimeEntry } from '../../test/fixtures'
 

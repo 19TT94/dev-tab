@@ -1,7 +1,7 @@
 import { useEffect, useState, type ReactNode } from 'react'
 import type { Session } from '@supabase/supabase-js'
 
-// Hooks
+// Contexts
 import { AuthContext } from './useAuth'
 
 // Utils

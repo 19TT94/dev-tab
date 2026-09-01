@@ -1,10 +1,13 @@
+// Utils
+import { resolveRate } from './utils'
+
+// Types
 import type {
   BillingTier,
   Client,
   DraftLineItem,
   TimeEntryWithProject,
 } from '../types/database'
-import { resolveRate } from './utils'
 
 export type ClientBillingInfo = Pick<
   Client,

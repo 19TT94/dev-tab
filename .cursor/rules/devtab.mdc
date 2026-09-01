@@ -1,6 +1,7 @@
 ---
 description: DevTab project conventions — React client structure, imports, styled-components, and theme usage
-alwaysApply: false
+globs: client/src/**/*.{ts,tsx}
+alwaysApply: true
 ---
 
 # DevTab Project Rules
@@ -15,27 +16,37 @@ alwaysApply: false
 
 ## Import groups
 
-Separate imports with blank lines and a comment label. Order:
+Separate local imports with a blank line and a comment label. External packages have no label. Order:
 
-1. External packages (no comment) — `react`, `react-router-dom`, `styled-components`, etc.
-2. `// Hooks`
-3. `// Components`
-4. `// Pages` — only in routing files like `App.tsx`
-5. `// Utils` — helpers from `lib/` (utils, billing, config, etc.)
-6. `// Types` — when importing from `types/`
-7. `// Styles` — theme, GlobalStyle
+1. External packages (no comment) — `react`, `react-router-dom`, `styled-components`, `vitest`, etc.
+2. `// Contexts` — providers and context objects (e.g. `AuthProvider`, `AuthContext`)
+3. `// Hooks`
+4. `// Components`
+5. `// Pages` — page modules in `App.tsx` and page tests
+6. `// Utils` — `lib/` helpers and `test/` helpers (`renderWithProviders`, fixtures)
+7. `// Types` — `import type` from `types/`, `lib/`, or `components/`
+8. `// Styles` — theme, GlobalStyle
 
-Use only the groups a file needs. Do not mix unlabeled local imports into a group.
+Use only the groups a file needs. Mixed value+type imports stay with the value's group. Do not mix unlabeled local imports into a group. Asset imports stay unlabeled.
 
 ```tsx
-import styled from "styled-components";
+import { useState } from 'react'
+import styled from 'styled-components'
+
+// Contexts
+import { AuthProvider } from '../hooks/AuthProvider'
+
+// Hooks
+import { useClients } from '../hooks/useClients'
 
 // Components
-import { Button } from "../components/Button";
-import { PageTitle } from "../components/ui";
+import { Button } from '../components/Button'
 
-// Styles
-import { theme } from "../styles/theme";
+// Utils
+import { formatCurrency } from '../lib/utils'
+
+// Types
+import type { Client } from '../types/database'
 ```
 
 ## Pages & feature components

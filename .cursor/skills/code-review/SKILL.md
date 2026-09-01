@@ -61,7 +61,7 @@ description: >-
 
 ## DevTab-specific checks
 
-- **Import groups** — external → Hooks → Components → Pages → Utils → Types → Styles
+- **Import groups** — external (no label) → Contexts → Hooks → Components → Pages → Utils → Types → Styles
 - **Styled-components** — no inline `style` prop; page-local styles under `// Style Overrides`
 - **Modals** — follow `ModalAddClient` / `ModalAddProject` pattern (form component + thin modal wrapper)
 - **Mock mode** — `isMockMode` branches in hooks must stay in sync with Supabase mutations

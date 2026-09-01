@@ -1,10 +1,16 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { useEffect, useState } from 'react'
+
+// Hooks
+import { useAuth } from './useAuth'
+
+// Utils
 import { isMockMode } from '../lib/config'
 import { mockStore } from '../lib/mockStore'
 import { supabase } from '../lib/supabase'
+
+// Types
 import type { ActiveTimer } from '../types/database'
-import { useAuth } from './useAuth'
 
 const LOCAL_TIMER_KEY = 'active_timer'
 

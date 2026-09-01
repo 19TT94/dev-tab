@@ -5,8 +5,10 @@ import { MutedHint, OverageBadge } from './ui'
 
 // Utils
 import { entryHasOverage, entryOverageSeconds } from '../lib/billing'
-import type { BilledSegment } from '../lib/billing'
 import { formatHours } from '../lib/utils'
+
+// Types
+import type { BilledSegment } from '../lib/billing'
 
 interface EntryOverageIndicatorProps {
   segments: BilledSegment[]

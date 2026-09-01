@@ -1,10 +1,16 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+
+// Hooks
+import { useAuth } from './useAuth'
+
+// Utils
 import { isMockMode } from '../lib/config'
 import { mockStore } from '../lib/mockStore'
 import { supabase } from '../lib/supabase'
 import { toIsoEndOfLocalDay, toIsoStartOfLocalDay } from '../lib/dateUtils'
+
+// Types
 import type { TimeEntryWithProject } from '../types/database'
-import { useAuth } from './useAuth'
 
 interface TimeEntryFilters {
   projectId?: string

@@ -1,12 +1,12 @@
 import { useForm } from 'react-hook-form'
 
-// Types
-import type { ProjectWithClient } from '../types/database'
-
 // Components
 import { Button } from './Button'
 import { Input } from './FormFields'
 import { ButtonRow, FormStack } from './ui'
+
+// Types
+import type { ProjectWithClient } from '../types/database'
 
 export interface ProjectFormPayload {
   client_id: string

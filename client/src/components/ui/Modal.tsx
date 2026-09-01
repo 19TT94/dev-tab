@@ -2,6 +2,7 @@ import { useEffect, type ReactNode } from 'react'
 import { createPortal } from 'react-dom'
 import styled from 'styled-components'
 
+// Components
 import { CardTitle } from './Card'
 
 interface ModalProps {

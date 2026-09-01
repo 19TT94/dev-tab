@@ -1,7 +1,13 @@
 import { renderHook, act, waitFor } from '@testing-library/react'
 import { describe, expect, it } from 'vitest'
+
+// Contexts
 import { AuthProvider } from '../AuthProvider'
+
+// Hooks
 import { useAuth } from '../useAuth'
+
+// Utils
 import { renderWithProviders } from '../../test/render'
 
 describe('useAuth', () => {

@@ -1,9 +1,9 @@
-// Types
-import type { TimeEntryWithProject } from '../types/database'
-
 // Components
 import { TimeEntryForm } from './TimeEntryForm'
 import { Modal } from './ui'
+
+// Types
+import type { TimeEntryWithProject } from '../types/database'
 
 interface ModalAddEntryProps {
   open: boolean

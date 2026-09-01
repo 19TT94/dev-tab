@@ -2,7 +2,11 @@ import { describe, expect, it } from 'vitest'
 import { Route, Routes } from 'react-router-dom'
 import { screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
+
+// Pages
 import TimeEntriesPage from '../TimeEntries'
+
+// Utils
 import { renderWithProviders } from '../../test/render'
 
 describe('TimeEntriesPage', () => {

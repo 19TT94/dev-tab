@@ -3,7 +3,10 @@ import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { ThemeProvider } from 'styled-components'
 
+// Components
 import { BaseTable } from '../BaseTable'
+
+// Styles
 import { theme } from '../../../styles/theme'
 
 interface Row {
