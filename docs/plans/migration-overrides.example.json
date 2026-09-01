@@ -1,0 +1,10 @@
+{
+  "$schema": "DevTab billing migration overrides",
+  "$comment": "Template only. Production overrides live in migration-overrides.json",
+  "clients": {
+    "bb05eb7e-5726-45db-8915-6149365544e4": {
+      "retainerProjectId": "fd28d43e-5eb4-4938-b8a4-22b440ef911c",
+      "notes": "Fluid Resource Managment → Hero Builder (single project, copy client retainer)"
+    }
+  }
+}
