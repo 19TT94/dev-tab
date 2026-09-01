@@ -28,4 +28,4 @@ npm run build
 ## Human-facing docs
 
 - App setup and workflow: [`README.md`](../README.md) (repo root)
-- Supabase schema: [`supabase/migrations/`](../supabase/migrations/)
+- Supabase migrations: [`docs/supabase.md`](../docs/supabase.md)

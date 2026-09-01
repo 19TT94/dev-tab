@@ -26,7 +26,7 @@ Check out [Demo](https://stage--dev-tab.netlify.app/)
 ### 1. Create a Supabase project
 
 1. Go to [supabase.com](https://supabase.com) and create a free project
-2. Open the **SQL Editor** and run [`supabase/migrations/001_initial_schema.sql`](supabase/migrations/001_initial_schema.sql)
+2. Link the CLI and push migrations: [`docs/supabase.md`](docs/supabase.md)
 3. Go to **Authentication → Providers** and ensure Email is enabled
 4. Go to **Authentication → Settings** and **disable** "Enable sign ups" (solo user)
 5. Go to **Authentication → Users** and manually create your user account
@@ -98,6 +98,8 @@ devtab/
 │   └── netlify.toml
 ├── supabase/
 │   └── migrations/
+├── docs/
+│   └── supabase.md   # schema / migration workflow
 └── README.md
 ```
 
@@ -106,6 +108,10 @@ devtab/
 This project uses your browser cache to mock data for testing. Mock data is defined in `mockStore.ts`. To enable mock data, set `VITE_USE_MOCK_DATA=true` in your environment variables.
 
 Mock data can be reset by clicking the "Reset mock data" button in the top right corner of the app.
+
+## Database
+
+Schema changes: [`docs/supabase.md`](docs/supabase.md). Use `supabase migration new` and `supabase db push`.
 
 ## Notes
 

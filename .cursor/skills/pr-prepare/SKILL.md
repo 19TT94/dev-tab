@@ -11,7 +11,7 @@ disable-model-invocation: true
 ## Repo layout
 
 - **Client app:** `client/` (React + Vite + TypeScript)
-- **Database:** `supabase/migrations/`
+- **Database:** `supabase/migrations/` (workflow: [`docs/supabase.md`](../../../docs/supabase.md))
 - **Netlify:** `client/netlify.toml` (base directory must be `client`)
 
 ## Checklist (run in order)
