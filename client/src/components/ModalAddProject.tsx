@@ -1,9 +1,9 @@
-// Types
-import type { ProjectWithClient } from '../types/database'
-
 // Components
 import { ProjectForm, type ProjectFormPayload } from './ProjectForm'
 import { Modal } from './ui'
+
+// Types
+import type { ProjectWithClient } from '../types/database'
 
 interface ModalAddProjectProps {
   open: boolean

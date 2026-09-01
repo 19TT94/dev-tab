@@ -6,9 +6,6 @@ import styled from 'styled-components'
 import { useTimeEntries, useTimeEntryMutations } from '../hooks/useTimeEntries'
 import { useTableState } from '../hooks/useTableState'
 
-// Types
-import type { TimeEntryWithProject } from '../types/database'
-
 // Components
 import { ModalAddEntry } from '../components/ModalAddEntry'
 import {
@@ -43,6 +40,9 @@ import {
   isWithinLocalDateRange,
   parseDateInputValue,
 } from '../lib/utils'
+
+// Types
+import type { TimeEntryWithProject } from '../types/database'
 
 const PAGE_SIZE = 10
 

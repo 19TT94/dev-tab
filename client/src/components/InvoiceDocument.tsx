@@ -9,9 +9,6 @@ import {
   StyleSheet,
 } from '@react-pdf/renderer'
 
-// Types
-import type { InvoiceWithDetails } from '../types/database'
-
 // Utils
 import { businessInfo } from '../lib/supabase'
 import {
@@ -24,6 +21,9 @@ import {
   resolveAssetUrl,
   splitInvoiceDescription,
 } from '../lib/utils'
+
+// Types
+import type { InvoiceWithDetails } from '../types/database'
 
 // Styles
 import { theme } from '../styles/theme'

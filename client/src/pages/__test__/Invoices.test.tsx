@@ -1,6 +1,10 @@
 import { describe, expect, it } from 'vitest'
 import { screen, waitFor } from '@testing-library/react'
+
+// Pages
 import InvoicesPage from '../Invoices'
+
+// Utils
 import { renderWithProviders } from '../../test/render'
 
 describe('InvoicesPage', () => {

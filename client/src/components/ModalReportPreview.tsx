@@ -1,14 +1,14 @@
 import { PDFViewer } from '@react-pdf/renderer'
 import styled from 'styled-components'
 
-// Utils
-import { type ReportPdfData } from '../lib/reportPdf'
-
 // Components
 import { Button } from './Button'
 import { ReportDocument } from './ReportDocument'
 import { downloadReportPdf } from './ReportPdf'
 import { ButtonRow, Modal } from './ui'
+
+// Types
+import type { ReportPdfData } from '../lib/reportPdf'
 
 interface ModalReportPreviewProps {
   open: boolean

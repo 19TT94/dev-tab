@@ -1,12 +1,15 @@
-import type { BilledSegment, RetainerUsageSummary } from './billing'
+// Utils
 import { entryBillableAmount } from './billing'
-import type { TimeEntryWithProject } from '../types/database'
 import {
   formatCurrency,
   formatDate,
   formatDuration,
   formatHours,
 } from './utils'
+
+// Types
+import type { BilledSegment, RetainerUsageSummary } from './billing'
+import type { TimeEntryWithProject } from '../types/database'
 
 function formatReportPeriodDate(date: string): string {
   const [year, month, day] = date.slice(0, 10).split('-')

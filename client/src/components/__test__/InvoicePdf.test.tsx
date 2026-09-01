@@ -1,6 +1,12 @@
 import { describe, expect, it, vi, beforeEach } from 'vitest'
+
+// Components
 import { downloadInvoicePdf } from '../InvoicePdf'
+
+// Utils
 import { makeClient } from '../../test/fixtures'
+
+// Types
 import type { InvoiceWithDetails } from '../../types/database'
 
 vi.mock('@react-pdf/renderer', () => ({

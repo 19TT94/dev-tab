@@ -1,10 +1,10 @@
 import { useEffect } from 'react'
 
-// Utils
-import { formatDuration } from '../lib/utils'
-
 // Hooks
 import { useTimer } from './useTimer'
+
+// Utils
+import { formatDuration } from '../lib/utils'
 
 const APP_TITLE = 'DevTab'
 

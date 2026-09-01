@@ -1,7 +1,11 @@
 import { describe, expect, it, vi } from 'vitest'
 import { screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
+
+// Components
 import { ActionMenu } from '../ActionMenu'
+
+// Utils
 import { renderWithProviders } from '../../test/render'
 
 describe('ActionMenu', () => {

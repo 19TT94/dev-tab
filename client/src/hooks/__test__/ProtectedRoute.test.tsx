@@ -1,9 +1,13 @@
 import { describe, expect, it, vi } from 'vitest'
 import { screen } from '@testing-library/react'
 import { Route, Routes } from 'react-router-dom'
+
+// Hooks
 import { ProtectedRoute } from '../ProtectedRoute'
-import { renderWithProviders } from '../../test/render'
 import * as useAuthModule from '../useAuth'
+
+// Utils
+import { renderWithProviders } from '../../test/render'
 
 describe('ProtectedRoute', () => {
   it('shows loading spinner while auth is loading', () => {

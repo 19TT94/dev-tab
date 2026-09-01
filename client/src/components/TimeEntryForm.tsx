@@ -4,13 +4,13 @@ import { useForm, useWatch } from 'react-hook-form'
 // Hooks
 import { useProjects } from '../hooks/useProjects'
 
-// Types
-import type { TimeEntryWithProject } from '../types/database'
-
 // Components
 import { Button } from './Button'
 import { Input, Select } from './FormFields'
 import { ButtonRow, Checkbox, CheckboxLabel, FormRow, FormStack } from './ui'
+
+// Types
+import type { TimeEntryWithProject } from '../types/database'
 
 interface TimeEntryFormData {
   project_id: string

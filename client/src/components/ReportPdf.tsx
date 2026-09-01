@@ -4,10 +4,10 @@ import { pdf } from '@react-pdf/renderer'
 import { ReportDocument } from './ReportDocument'
 
 // Utils
-import {
-  reportPdfFilename,
-  type ReportPdfData,
-} from '../lib/reportPdf'
+import { reportPdfFilename } from '../lib/reportPdf'
+
+// Types
+import type { ReportPdfData } from '../lib/reportPdf'
 
 export const downloadReportPdf = async (
   report: ReportPdfData,

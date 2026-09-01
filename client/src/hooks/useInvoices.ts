@@ -1,10 +1,16 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+
+// Hooks
+import { useAuth } from './useAuth'
+
+// Utils
 import { isMockMode } from '../lib/config'
 import { mockStore } from '../lib/mockStore'
 import { supabase } from '../lib/supabase'
-import type { DraftLineItem, InvoiceWithDetails } from '../types/database'
 import { generateInvoiceNumber } from '../lib/utils'
-import { useAuth } from './useAuth'
+
+// Types
+import type { DraftLineItem, InvoiceWithDetails } from '../types/database'
 
 export function useInvoices() {
   const { user } = useAuth()

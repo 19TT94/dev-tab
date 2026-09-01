@@ -1,9 +1,15 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+
+// Hooks
+import { useAuth } from './useAuth'
+
+// Utils
 import { isMockMode } from '../lib/config'
 import { mockStore } from '../lib/mockStore'
 import { supabase } from '../lib/supabase'
+
+// Types
 import type { Client } from '../types/database'
-import { useAuth } from './useAuth'
 
 export function useClients() {
   const { user } = useAuth()

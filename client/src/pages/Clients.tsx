@@ -5,11 +5,6 @@ import styled from 'styled-components'
 import { useClients, useClientMutations } from '../hooks/useClients'
 import { useProjects, useProjectMutations } from '../hooks/useProjects'
 
-// Types
-import type { Client, ProjectWithClient } from '../types/database'
-import type { ClientFormData } from '../components/ClientForm'
-import type { ProjectFormPayload } from '../components/ProjectForm'
-
 // Components
 import { ModalAddClient } from '../components/ModalAddClient'
 import { ModalAddProject } from '../components/ModalAddProject'
@@ -28,6 +23,11 @@ import {
 // Utils
 import { hasRetainerBilling } from '../lib/billing'
 import { formatCurrency } from '../lib/utils'
+
+// Types
+import type { Client, ProjectWithClient } from '../types/database'
+import type { ClientFormData } from '../components/ClientForm'
+import type { ProjectFormPayload } from '../components/ProjectForm'
 
 const ClientsPage = () => {
   const { data: clients = [], isLoading: clientsLoading } = useClients()

@@ -1,3 +1,4 @@
+// Utils
 import { INVOICE_NUMBER_START, isMockMode } from './config'
 import { mockStore } from './mockStore'
 import { supabase } from './supabase'

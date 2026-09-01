@@ -1,5 +1,9 @@
 import { describe, expect, it, vi, beforeEach } from 'vitest'
+
+// Components
 import { downloadReportPdf } from '../ReportPdf'
+
+// Types
 import type { ReportPdfData } from '../../lib/reportPdf'
 
 vi.mock('@react-pdf/renderer', () => ({

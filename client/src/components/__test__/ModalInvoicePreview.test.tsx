@@ -2,10 +2,18 @@ import { describe, expect, it, vi } from 'vitest'
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { ThemeProvider } from 'styled-components'
+
+// Components
 import { ModalInvoicePreview } from '../ModalInvoicePreview'
+
+// Utils
 import { makeClient } from '../../test/fixtures'
-import { theme } from '../../styles/theme'
+
+// Types
 import type { InvoiceWithDetails } from '../../types/database'
+
+// Styles
+import { theme } from '../../styles/theme'
 
 vi.mock('../InvoiceDocument', () => ({
   InvoiceDocument: () => <div data-testid="invoice-document" />,

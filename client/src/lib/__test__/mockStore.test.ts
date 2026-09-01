@@ -1,4 +1,6 @@
 import { beforeEach, describe, expect, it } from 'vitest'
+
+// Utils
 import { mockStore } from '../mockStore'
 import { INVOICE_NUMBER_START, MOCK_USER_ID } from '../config'
 

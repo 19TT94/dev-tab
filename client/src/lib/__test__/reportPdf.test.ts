@@ -1,4 +1,6 @@
 import { describe, expect, it } from 'vitest'
+
+// Utils
 import { buildReportPdfData, reportPdfFilename } from '../reportPdf'
 import { makeTimeEntry } from '../../test/fixtures'
 

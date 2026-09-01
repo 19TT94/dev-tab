@@ -1,5 +1,7 @@
 import { renderHook } from '@testing-library/react'
 import { afterEach, describe, expect, it, vi } from 'vitest'
+
+// Hooks
 import { useTimerDocumentTitle } from '../useTimerDocumentTitle'
 import * as useTimerModule from '../useTimer'
 

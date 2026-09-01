@@ -1,12 +1,12 @@
 import { useForm, useWatch } from 'react-hook-form'
 
-// Types
-import type { Client } from '../types/database'
-
 // Components
 import { Button } from './Button'
 import { Input } from './FormFields'
 import { ButtonRow, Checkbox, CheckboxLabel, FormStack, Panel, Text } from './ui'
+
+// Types
+import type { Client } from '../types/database'
 
 export interface ClientFormData {
   name: string

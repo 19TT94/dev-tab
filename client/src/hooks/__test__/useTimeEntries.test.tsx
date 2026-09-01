@@ -1,9 +1,15 @@
+import { QueryClientProvider } from '@tanstack/react-query'
 import { renderHook, waitFor } from '@testing-library/react'
 import { describe, expect, it } from 'vitest'
-import { QueryClientProvider } from '@tanstack/react-query'
+
+// Contexts
+import { AuthProvider } from '../AuthProvider'
+
+// Hooks
 import { useTimeEntries, useTimeEntryMutations } from '../useTimeEntries'
 import { useProjects } from '../useProjects'
-import { AuthProvider } from '../AuthProvider'
+
+// Utils
 import { createTestQueryClient } from '../../test/render'
 
 function wrapper({ children }: { children: React.ReactNode }) {

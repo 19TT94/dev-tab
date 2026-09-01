@@ -1,7 +1,11 @@
 import { describe, expect, it } from 'vitest'
 import { render, screen } from '@testing-library/react'
 import { ThemeProvider } from 'styled-components'
+
+// Components
 import App from '../App'
+
+// Styles
 import { GlobalStyle } from '../styles/GlobalStyle'
 import { theme } from '../styles/theme'
 

@@ -1,14 +1,14 @@
 import { PDFViewer } from '@react-pdf/renderer'
 import styled from 'styled-components'
 
-// Types
-import type { InvoiceWithDetails } from '../types/database'
-
 // Components
 import { Button } from './Button'
 import { InvoiceDocument } from './InvoiceDocument'
 import { downloadInvoicePdf } from './InvoicePdf'
 import { ButtonRow, Modal } from './ui'
+
+// Types
+import type { InvoiceWithDetails } from '../types/database'
 
 interface ModalInvoicePreviewProps {
   open: boolean

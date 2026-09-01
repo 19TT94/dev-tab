@@ -1,5 +1,6 @@
 import styled from 'styled-components'
 
+// Components
 import { fieldBase } from './InlineFields'
 
 const FieldGroup = styled.div`

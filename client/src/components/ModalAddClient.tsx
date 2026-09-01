@@ -1,9 +1,9 @@
-// Types
-import type { Client } from '../types/database'
-
 // Components
 import { ClientForm, type ClientFormData } from './ClientForm'
 import { Modal } from './ui'
+
+// Types
+import type { Client } from '../types/database'
 
 interface ModalAddClientProps {
   open: boolean

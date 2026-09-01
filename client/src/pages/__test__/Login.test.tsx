@@ -1,7 +1,11 @@
 import { describe, expect, it } from 'vitest'
 import { screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
+
+// Pages
 import Login from '../Login'
+
+// Utils
 import { renderWithProviders } from '../../test/render'
 
 describe('Login', () => {

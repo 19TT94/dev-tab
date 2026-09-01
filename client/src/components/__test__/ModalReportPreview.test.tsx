@@ -2,9 +2,15 @@ import { describe, expect, it, vi } from 'vitest'
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { ThemeProvider } from 'styled-components'
+
+// Components
 import { ModalReportPreview } from '../ModalReportPreview'
-import { theme } from '../../styles/theme'
+
+// Types
 import type { ReportPdfData } from '../../lib/reportPdf'
+
+// Styles
+import { theme } from '../../styles/theme'
 
 vi.mock('../ReportDocument', () => ({
   ReportDocument: () => <div data-testid="report-document" />,

@@ -6,9 +6,6 @@ import { useClients } from '../hooks/useClients'
 import { useProjects } from '../hooks/useProjects'
 import { useTimeEntries } from '../hooks/useTimeEntries'
 
-// Types
-import type { TimeEntryWithProject } from '../types/database'
-
 // Components
 import { Button } from '../components/Button'
 import { EntryOverageIndicator } from '../components/EntryOverageIndicator'
@@ -54,6 +51,9 @@ import {
   formatHours,
   toDateInputValue,
 } from '../lib/utils'
+
+// Types
+import type { TimeEntryWithProject } from '../types/database'
 
 const ReportsPage = () => {
   const { data: clients = [] } = useClients()

@@ -9,8 +9,10 @@ import {
 
 // Utils
 import { businessInfo } from '../lib/supabase'
-import { type ReportPdfData } from '../lib/reportPdf'
 import { formatCurrency, formatHours } from '../lib/utils'
+
+// Types
+import type { ReportPdfData } from '../lib/reportPdf'
 
 // Styles
 import { theme } from '../styles/theme'

@@ -1,3 +1,8 @@
+// Utils
+import { INVOICE_NUMBER_START, MOCK_USER_ID } from './config'
+import { toIsoEndOfLocalDay, toIsoStartOfLocalDay } from './dateUtils'
+
+// Types
 import type {
   ActiveTimer,
   Client,
@@ -10,8 +15,6 @@ import type {
   TimeEntry,
   TimeEntryWithProject,
 } from '../types/database'
-import { INVOICE_NUMBER_START, MOCK_USER_ID } from './config'
-import { toIsoEndOfLocalDay, toIsoStartOfLocalDay } from './dateUtils'
 
 const STORAGE_KEY = 'personal-invoice-mock-data'
 

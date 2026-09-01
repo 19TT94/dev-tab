@@ -1,6 +1,6 @@
 import styled, { css } from 'styled-components'
 
-import type { SortDirection } from '../../lib/tableUtils'
+// Components
 import { Spinner } from './Spinner'
 import { Text } from './Layout'
 import {
@@ -11,6 +11,9 @@ import {
   Td,
   Th,
 } from './Table'
+
+// Types
+import type { SortDirection } from '../../lib/tableUtils'
 
 export interface TableColumn<T> {
   key: string

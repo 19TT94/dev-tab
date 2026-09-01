@@ -11,9 +11,6 @@ import {
   useInvoiceMutations,
 } from '../hooks/useInvoices'
 
-// Types
-import type { InvoiceWithDetails } from '../types/database'
-
 // Components
 import { ModalAddInvoice } from '../components/ModalAddInvoice'
 import { ModalInvoicePreview } from '../components/ModalInvoicePreview'
@@ -45,6 +42,9 @@ import {
   formatDate,
 } from '../lib/utils'
 import { isOverageLineItem } from '../lib/billing'
+
+// Types
+import type { InvoiceWithDetails } from '../types/database'
 
 type InvoiceLineItemRow = InvoiceWithDetails['invoice_line_items'][number]
 

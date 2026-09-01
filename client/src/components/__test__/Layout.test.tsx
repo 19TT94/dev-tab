@@ -1,9 +1,15 @@
 import { describe, expect, it, vi } from 'vitest'
 import { screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import { Layout } from '../Layout'
-import { renderWithProviders } from '../../test/render'
+
+// Hooks
 import * as useAuthModule from '../../hooks/useAuth'
+
+// Components
+import { Layout } from '../Layout'
+
+// Utils
+import { renderWithProviders } from '../../test/render'
 
 describe('Layout', () => {
   it('renders navigation and children', () => {

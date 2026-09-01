@@ -1,3 +1,4 @@
+// Types
 import type { Client, TimeEntryWithProject } from '../types/database'
 import type { ClientBillingInfo } from '../lib/billing'
 
