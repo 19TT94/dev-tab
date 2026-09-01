@@ -93,7 +93,6 @@ function createSeedData(): MockData {
       client_id: client1Id,
       name: 'Website Redesign',
       hourly_rate: null,
-      billable: true,
       archived: false,
       created_at: createdAt,
     },
@@ -103,7 +102,6 @@ function createSeedData(): MockData {
       client_id: client1Id,
       name: 'Internal Tools',
       hourly_rate: 100,
-      billable: true,
       archived: false,
       created_at: createdAt,
     },
@@ -113,7 +111,6 @@ function createSeedData(): MockData {
       client_id: client2Id,
       name: 'MVP Development',
       hourly_rate: null,
-      billable: true,
       archived: false,
       created_at: createdAt,
     },
@@ -401,7 +398,6 @@ export const mockStore = {
     client_id: string
     name: string
     hourly_rate?: number | null
-    billable?: boolean
   }): Project {
     const data = load()
     const project: Project = {
@@ -410,7 +406,6 @@ export const mockStore = {
       client_id: input.client_id,
       name: input.name,
       hourly_rate: input.hourly_rate ?? null,
-      billable: input.billable ?? true,
       archived: false,
       created_at: now(),
     }
@@ -423,7 +418,6 @@ export const mockStore = {
     id: string
     name: string
     hourly_rate?: number | null
-    billable?: boolean
     archived?: boolean
   }): Project {
     const data = load()

@@ -42,7 +42,6 @@ export function useProjectMutations() {
       client_id: string
       name: string
       hourly_rate?: number | null
-      billable?: boolean
     }) => {
       if (isMockMode) return mockStore.createProject(input)
       const { data, error } = await supabase
@@ -61,7 +60,6 @@ export function useProjectMutations() {
       id: string
       name: string
       hourly_rate?: number | null
-      billable?: boolean
       archived?: boolean
     }) => {
       if (isMockMode) return mockStore.updateProject(input)
