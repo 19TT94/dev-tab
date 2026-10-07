@@ -6,7 +6,7 @@ This folder configures Cursor for the **DevTab** repo (time tracking, billing, a
 |------|---------|
 | [`BUGBOT.md`](BUGBOT.md) | Review rules for **Agent Review** and **Bugbot** on GitHub |
 | [`rules/devtab.mdc`](rules/devtab.mdc) | Agent rules: imports, styled-components, page structure, theme |
-| [`skills/code-review/`](skills/code-review/) | Agent skill: review a branch/PR against DevTab conventions |
+| [`review/devtab.md`](review/devtab.md) | Review guide: DevTab conventions, applied by the global `code-review` skill |
 | [`skills/pr-prepare/`](skills/pr-prepare/) | Agent skill: lint, test, build checklist before opening a PR |
 
 ## Quick commands
